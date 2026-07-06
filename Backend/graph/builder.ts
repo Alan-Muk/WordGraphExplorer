@@ -54,3 +54,26 @@ export function buildGraph(data: any) {
     edges
   };
 }
+
+/**
+ * Builds a graph representation from raw ConceptNet API data.
+ *
+ * The function extracts valid concepts (nodes) and semantic relationships
+ * (edges) from the API response, filters out unsupported or invalid
+ * relationships, and assigns a weight to each edge based on its
+ * relationship type.
+ *
+ * Only relationships listed in the `ALLOWED` set are included in the
+ * resulting graph. Duplicate nodes are automatically eliminated using
+ * a map, while all valid edges are preserved.
+ *
+ * @param data - Raw ConceptNet response containing an `edges` array.
+ * @returns An object containing:
+ *   - `nodes`: Array of unique graph nodes.
+ *   - `edges`: Array of weighted graph edges.
+ *
+ * @example
+ * const graph = buildGraph(conceptNetData);
+ * console.log(graph.nodes); // [{ data: { id: "dog", label: "dog" } }, ...]
+ * console.log(graph.edges); // [{ data: { source: "dog", target: "animal", ... } }, ...]
+ */
