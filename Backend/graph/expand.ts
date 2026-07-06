@@ -68,3 +68,47 @@ export async function expandGraph(
     edges
   };
 }
+
+/**
+ * Expands a semantic graph by recursively exploring related concepts
+ * from a given root node.
+ *
+ * Starting from the root concept, this function fetches ConceptNet data,
+ * converts it into graph nodes and edges, and recursively traverses
+ * connected concepts up to the specified depth. Results are cached to
+ * prevent duplicate API requests, and concurrent requests are limited
+ * to improve performance while avoiding excessive network usage.
+ *
+ * Features:
+ * - Recursive graph expansion with configurable depth.
+ * - In-memory caching of fetched concepts.
+ * - Concurrency limiting using `p-limit`.
+ * - Merges discovered nodes and edges into a single graph.
+ * - Restricts branching to the first 20 connected concepts per node.
+ *
+ * @param root - The starting concept for graph expansion.
+ * @param depth - Maximum recursion depth (default: `2`).
+ * @param cache - Optional cache storing previously fetched concepts.
+ * @returns A graph object containing:
+ *   - `center`: The root concept.
+ *   - `nodes`: Unique graph nodes.
+ *   - `edges`: Graph edges connecting the nodes.
+ 
+   * Recursively explores a concept and its neighboring concepts.
+   *
+   * Stops when the maximum depth is reached, reuses cached data when
+   * available, fetches new concept data otherwise, and schedules
+   * exploration of neighboring concepts while respecting the
+   * configured concurrency limit.
+   *
+   * @param word - The concept currently being explored.
+   * @param d - Current recursion depth.
+   
+
+   * Merges nodes and edges from a subgraph into the accumulated graph.
+   *
+   * Nodes are stored in a map to ensure uniqueness, while edges are
+   * appended to the resulting edge list.
+   *
+   * @param graph - Graph containing `nodes` and `edges` to merge.
+   */
