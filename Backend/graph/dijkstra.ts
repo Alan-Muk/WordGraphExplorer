@@ -48,3 +48,27 @@ export function dijkstra(
 
   return path[0] === start ? path : [];
 }
+
+/**
+ * Finds the shortest path between two nodes in a weighted graph using
+ * Dijkstra's algorithm.
+ *
+ * The algorithm computes the minimum cumulative edge weight required to
+ * travel from the start node to the end node. It maintains the shortest
+ * known distance to each node, tracks predecessors for path
+ * reconstruction, and returns the resulting path if one exists.
+ *
+ * This implementation uses a sorted array as its priority queue, making
+ * it suitable for small to medium-sized graphs. For larger graphs, a
+ * binary heap or priority queue would provide better performance.
+ *
+ * @param graph - Adjacency list representation of a weighted graph.
+ * @param start - The starting node.
+ * @param end - The destination node.
+ * @returns An array of node IDs representing the shortest path from
+ * `start` to `end`. Returns an empty array if no path exists.
+ *
+ * @example
+ * const path = dijkstra(graph, "dog", "animal");
+ * // ["dog", "mammal", "animal"]
+ */
