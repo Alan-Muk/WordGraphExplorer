@@ -1,11 +1,11 @@
 # Word Graph
-# Word Graph
-
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
-![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
-![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)
-![Express](https://img.shields.io/badge/Express.js-Backend-black?logo=express)
-![License](https://img.shields.io/badge/License-MIT-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-Backend-000000?logo=express)
+![ConceptNet](https://img.shields.io/badge/API-ConceptNet-orange)
+![Graph_Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra-blueviolet)
 
 A semantic graph exploration and reasoning system built on top of ConceptNet, combining knowledge graph construction, weighted graph search, and interactive visualization.
 
