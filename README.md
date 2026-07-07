@@ -1,4 +1,11 @@
 # Word Graph
+# Word Graph
+
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite)
+![Express](https://img.shields.io/badge/Express.js-Backend-black?logo=express)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 A semantic graph exploration and reasoning system built on top of ConceptNet, combining knowledge graph construction, weighted graph search, and interactive visualization.
 
