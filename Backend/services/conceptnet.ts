@@ -63,3 +63,15 @@ export async function fetchNode(word: string) {
     return fallback;
   }
 }
+
+/* --------------------------------------------------------------------------
+ * End of ConceptNet API client
+ *
+ * Module summary:
+ * - Retrieves ConceptNet data with automatic retry logic.
+ * - Uses exponential backoff for transient request failures.
+ * - Caches responses in memory to reduce repeated API calls.
+ * - Returns a fallback object on permanent failure to keep the
+ *   graph pipeline operational.
+ *
+ * -------------------------------------------------------------------------- */
