@@ -38,3 +38,15 @@ router.get("/", async (req, res) => {
 });
 
 export default router;
+
+/* --------------------------------------------------------------------------
+ * End of path route
+ *
+ * Route summary:
+ * - Validates the source and destination query parameters.
+ * - Expands the graph from the source node.
+ * - Builds an adjacency map from the graph edges.
+ * - Computes the shortest path using Dijkstra's algorithm.
+ * - Returns the resulting path or a 500 error if computation fails.
+ *
+ * -------------------------------------------------------------------------- */
