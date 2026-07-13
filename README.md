@@ -1,194 +1,425 @@
 # Word Graph
+
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-Backend-000000?logo=express)
 ![ConceptNet](https://img.shields.io/badge/API-ConceptNet-orange)
-![Graph_Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra-blueviolet)
+![Graph Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra-blueviolet)
 
-A semantic graph exploration and reasoning system built on top of ConceptNet, combining knowledge graph construction, weighted graph search, and interactive visualization.
+A semantic graph exploration platform that transforms natural language concepts into interactive knowledge graphs using ConceptNet, weighted graph modeling, and shortest-path algorithms.
 
-It lets you:
-
-- Explore semantic relationships between words  
-- Build multi-hop concept graphs  
-- Compute shortest meaning paths between concepts  
-- Visualize reasoning steps interactively  
+The system enables users to explore relationships between concepts, discover semantic connections, and visualize reasoning paths through an interactive graph interface.
 
 ---
 
-## Overview
+# Overview
 
-Word Graph is a full-stack system that turns natural language concepts into a navigable graph:
+Word Graph is a full-stack semantic reasoning system built around dynamically generated knowledge graphs.
 
-**Word → ConceptNet API → Graph Builder → Weighted Graph → Dijkstra Pathfinding → Interactive Visualization**
+The system workflow:
 
-It acts as a lightweight semantic reasoning engine over a dynamically constructed knowledge graph.
+```text
+Concept Input
+      |
+      ↓
+ConceptNet API
+      |
+      ↓
+Graph Construction
+      |
+      ↓
+Weighted Knowledge Graph
+      |
+      ↓
+Dijkstra Pathfinding
+      |
+      ↓
+Interactive Visualization
+```
 
----
-
-## Core Features
-
-### Graph Construction
-- Expands concepts using the ConceptNet API  
-- Filters semantic relationships  
-- Builds multi-hop knowledge graphs  
-
-### Semantic Weighting
-- Assigns meaning-based weights to relationships  
-- Prioritizes stronger semantic connections (e.g. *IsA*) over weaker ones (*RelatedTo*)  
-
-### Pathfinding
-- Uses Dijkstra’s algorithm to compute shortest semantic paths  
-- Interprets “meaning distance” between concepts  
-
-### Interactive Visualization
-- Powered by Cytoscape.js  
-- Displays nodes and relationships dynamically  
-- Animates semantic paths step-by-step  
+The goal is to represent semantic relationships as a navigable graph where concepts can be connected, analyzed, and explored through graph algorithms.
 
 ---
 
-##  Architecture
+# Problem
 
-### Frontend (React + Vite)
-- Graph visualization (Cytoscape.js)  
-- Path animation system  
-- API client layer  
+Understanding relationships between concepts requires more than simple keyword matching.
 
-### Backend (Express)
-- `GET /graph/:word` → builds semantic graph  
-- `GET /path?from=X&to=Y` → computes shortest path  
+Traditional search systems identify related words but often fail to explain:
 
-### Graph Engine
-- Recursive graph expansion (`expandGraph`)  
-- Edge filtering (`buildGraph`)  
-- Adjacency construction (`buildAdjacency`)  
-- Weighted shortest path (`dijkstra`)  
+- Why concepts are connected
+- How concepts relate through intermediate ideas
+- Which path represents the strongest semantic relationship
 
-### External Data Source
-- ConceptNet API for semantic relationships  
+Word Graph addresses this by modeling concepts as weighted graphs and applying graph traversal algorithms to discover meaningful paths.
 
 ---
 
-## API
+# Architecture
 
-### Build Graph
-`GET /graph/:word`
+## System Architecture
 
+```text
+React + TypeScript Client
+          |
+          |
+      Express API
+          |
+          |
+   Graph Processing Engine
+          |
+          |
+   ConceptNet Knowledge Graph
+```
+
+---
+
+# Components
+
+## Frontend
+
+Built with React and Vite.
+
+Responsibilities:
+
+- Interactive graph visualization
+- User input handling
+- Path animation
+- Graph exploration interface
+
+Technologies:
+
+- React
+- TypeScript
+- Cytoscape.js
+- Vite
+
+---
+
+## Backend
+
+Built with Node.js and Express.
+
+Responsibilities:
+
+- Fetch semantic relationships
+- Construct graph structures
+- Provide graph and pathfinding APIs
+- Handle caching and retries
+
+API endpoints:
+
+### Build Semantic Graph
+
+```
+GET /graph/:word
+```
+
+Example response:
+
+```json
 {
-  "nodes": [...],
-  "edges": [...]
+  "nodes": [],
+  "edges": []
 }
+```
 
-## Find Semantic Path
+---
+
+### Find Semantic Path
+
+```
 GET /path?from=word1&to=word2
+```
 
-Returns:
+Example response:
 
+```json
 {
   "from": "dog",
   "to": "zoo",
-  "path": ["dog", "animal", "zoo"]
+  "path": [
+    "dog",
+    "animal",
+    "zoo"
+  ]
 }
+```
 
-## Installation
-1. Clone the repo
-git clone https://github.com/your-username/word-graph
-cd word-graph
-2. Install dependencies
-Backend:
-cd server
-npm install
-Frontend:
-cd client
-npm install
+---
 
-## Running the Project
-Start backend
-cd server
-npm run dev
+# Core Features
 
-Runs on:
+## Dynamic Graph Construction
 
-http://localhost:3001
-Start frontend
-cd client
-npm run dev
+- Expands concepts using the ConceptNet API
+- Builds multi-hop semantic graphs
+- Filters irrelevant relationships
+- Creates navigable graph structures
 
-Runs on:
+---
 
-http://localhost:5173
+## Weighted Semantic Relationships
 
-## Key Concepts
-Semantic Graph
+Relationships are assigned weights based on semantic strength.
 
-Nodes represent concepts, edges represent relationships:
+Example:
 
-IsA
-UsedFor
-CapableOf
-PartOf
-HasProperty
-Causes
-RelatedTo
-Edge Weights
-Relation	Weight
-IsA	1
-UsedFor	2
-CapableOf	2
-HasProperty	2
-PartOf	3
-Causes	3
-RelatedTo	5
+| Relationship | Weight |
+|---|---:|
+| IsA | 1 |
+| UsedFor | 2 |
+| CapableOf | 2 |
+| HasProperty | 2 |
+| PartOf | 3 |
+| Causes | 3 |
+| RelatedTo | 5 |
 
-Lower weight = stronger semantic connection.
+Lower weights represent stronger semantic connections.
 
-## Graph Expansion
-Recursive exploration of related concepts
-Depth-limited traversal
-API caching for performance
-Pathfinding
+---
 
-Uses Dijkstra’s algorithm to find the lowest-cost semantic path between two concepts.
+## Graph Pathfinding
 
-## Visualization
+The system uses Dijkstra's shortest path algorithm to determine the lowest-cost semantic path between concepts.
+
+Example:
+
+```text
+dog
+ |
+animal
+ |
+zoo
+```
+
+The result represents the shortest semantic relationship path discovered by the graph engine.
+
+---
+
+## Interactive Visualization
+
 The frontend uses Cytoscape.js to:
-Render semantic graphs
-Highlight shortest paths
-Animate step-by-step traversal
-Center view on active nodes
 
-##  Tech Stack
-Frontend
-React
-Vite
-Cytoscape.js
-TypeScript
-Backend
-Node.js
-Express
-Axios
-Data Source
-ConceptNet API
+- Render dynamic graphs
+- Display concept relationships
+- Highlight computed paths
+- Animate traversal steps
+- Center the view around active nodes
 
-##  Design Highlights
-Cached API layer with retry logic
-Recursive graph expansion with concurrency control
-Weighted semantic reasoning model
-Bidirectional graph representation
-Interactive visual explanation of computed paths
+---
 
-##  Example Use Cases
-“How is dog related to zoo?”
-Semantic exploration of concepts
-Educational visualization of knowledge relationships
-AI preprocessing for GraphRAG-style systems
+# Technical Highlights
 
-##  Future Improvements
-Add LRU/TTL cache for graph expansion
-Introduce A* search for faster pathfinding
-Add edge explanation layer (human-readable reasoning)
-Streaming graph visualization
-LLM-powered semantic explanations
+- Built a dynamic semantic graph generation engine
+- Implemented weighted graph traversal algorithms
+- Designed recursive graph expansion with depth limits
+- Added API caching and retry handling
+- Created bidirectional graph representations
+- Built interactive visualization for algorithm explanations
+
+---
+
+# Design Decisions
+
+## Weighted Graph Model
+
+Not all semantic relationships have equal meaning.
+
+The system assigns different costs to relationships to prioritize stronger connections.
+
+Example:
+
+```
+dog → animal
+```
+
+has a stronger semantic relationship than:
+
+```
+dog → related concept
+```
+
+---
+
+## Recursive Graph Expansion
+
+The graph builder expands concepts recursively while controlling:
+
+- Maximum traversal depth
+- API usage
+- Graph size
+
+This balances exploration depth with performance.
+
+---
+
+## Caching Strategy
+
+External API requests are cached to:
+
+- Reduce repeated ConceptNet calls
+- Improve response time
+- Increase reliability
+
+---
+
+# Tech Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- Cytoscape.js
+
+## Backend
+
+- Node.js
+- Express
+- Axios
+
+## Data Source
+
+- ConceptNet API
+
+## Algorithms
+
+- Graph traversal
+- Weighted graphs
+- Dijkstra shortest path
+
+---
+
+# How It Works
+
+1. User enters a concept.
+2. Backend requests related concepts from ConceptNet.
+3. The graph builder converts relationships into nodes and edges.
+4. Relationships receive semantic weights.
+5. Dijkstra's algorithm calculates the lowest-cost path.
+6. React visualizes the resulting graph and reasoning path.
+
+---
+
+# Example Use Cases
+
+- Semantic relationship exploration
+- Knowledge graph visualization
+- Educational graph algorithm demonstrations
+- Graph-based AI preprocessing
+- GraphRAG-style experimentation
+
+---
+
+# Challenges
+
+## Large Graph Expansion
+
+Expanding concepts can quickly create large graphs.
+
+Solution:
+
+- Depth-limited traversal
+- Relationship filtering
+- Caching
+
+---
+
+## Semantic Ranking
+
+Different ConceptNet relationships have different meanings.
+
+Solution:
+
+- Custom relationship weighting system
+- Priority-based traversal
+
+---
+
+## Visualization Performance
+
+Large graphs can become difficult to navigate.
+
+Solution:
+
+- Interactive rendering
+- Selective path highlighting
+- Dynamic graph updates
+
+---
+
+# Future Improvements
+
+- Add LRU/TTL cache management
+- Implement A* pathfinding
+- Add human-readable edge explanations
+- Introduce streaming graph updates
+- Add AI-generated semantic explanations
+- Improve graph ranking algorithms
+
+---
+
+# Running Locally
+
+## Clone Repository
+
+```bash
+git clone https://github.com/Alan-Muk/Word-Graph
+cd Word-Graph
+```
+
+---
+
+## Install Dependencies
+
+Backend:
+
+```bash
+cd server
+npm install
+```
+
+Frontend:
+
+```bash
+cd client
+npm install
+```
+
+---
+
+## Start Backend
+
+```bash
+npm run dev
+```
+
+Backend runs on:
+
+```
+http://localhost:3001
+```
+
+---
+
+## Start Frontend
+
+```bash
+cd client
+npm run dev
+```
+
+Frontend runs on:
+
+```
+http://localhost:5173
+```
+
+---
+
+# License
+
+MIT License
