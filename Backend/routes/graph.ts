@@ -32,3 +32,14 @@ router.get("/:word", async (req, res) => {
 });
 
 export default router;
+
+/* --------------------------------------------------------------------------
+ * End of graph route
+ *
+ * Route summary:
+ * - Normalizes the requested word.
+ * - Expands the graph from the starting node.
+ * - Returns a fallback graph if the node cannot be found.
+ * - Responds with a 503 error if graph expansion fails unexpectedly.
+ *
+ * -------------------------------------------------------------------------- */
