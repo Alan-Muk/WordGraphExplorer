@@ -6,6 +6,14 @@ export interface GraphNode {
 
   definition?: string;
 
+  examples?: string[];
+
+  pos?: string;
+
+  synset?: string;
+
+  lemmas?: string[];
+
 }
 
 
@@ -32,9 +40,9 @@ export interface GraphResponse {
 
   stats: {
 
-    nodes:number;
+    nodes: number;
 
-    edges:number;
+    edges: number;
 
   };
 

@@ -1,20 +1,16 @@
-
 import { useEffect, useRef } from "react";
 import cytoscape from "cytoscape";
 import cola from "cytoscape-cola";
 
 import { fetchGraph } from "../api/graph";
-import type { GraphResponse } from "../types/graph";
+import type { GraphResponse, GraphNode } from "../types/graph";
 
 cytoscape.use(cola);
 
 interface Props {
   graph: GraphResponse;
   selectedId?: string | null;
-  onSelect: (node: {
-    id: string;
-    label: string;
-  }) => void;
+  onSelect: (node: GraphNode) => void;
 }
 
 export default function GraphCanvas({
@@ -41,9 +37,6 @@ export default function GraphCanvas({
   }, [onSelect]);
 
 
-  /*
-    Create Cytoscape once.
-  */
   useEffect(() => {
 
     if (!container.current) {
@@ -94,12 +87,13 @@ export default function GraphCanvas({
 
               "border-color":
                 "#cbd5e1"
+
             }
           },
 
 
           {
-            selector:"edge",
+            selector: "edge",
 
             style: {
 
@@ -117,6 +111,7 @@ export default function GraphCanvas({
 
               "line-opacity":
                 0.7
+
             }
           },
 
@@ -203,6 +198,7 @@ export default function GraphCanvas({
 
         ],
 
+
         layout:{
           name:"preset"
         },
@@ -222,6 +218,7 @@ export default function GraphCanvas({
 
         maxZoom:
           4
+
       });
 
 
@@ -236,18 +233,14 @@ export default function GraphCanvas({
         const node =
           event.target;
 
-        onSelectRef.current({
 
-          id:
-            node.id(),
-
-          label:
-            node.data("label")
-
-        });
+        onSelectRef.current(
+          node.data() as GraphNode
+        );
 
       }
     );
+
 
 
     cy.on(
@@ -258,12 +251,15 @@ export default function GraphCanvas({
         cy.elements()
           .removeClass("highlight");
 
+
         event.target
           .addClass("highlight");
+
 
         event.target
           .connectedEdges()
           .addClass("highlight");
+
 
         event.target
           .neighborhood()
@@ -271,6 +267,7 @@ export default function GraphCanvas({
 
       }
     );
+
 
 
     cy.on(
@@ -284,9 +281,7 @@ export default function GraphCanvas({
     );
 
 
-    /*
-      Expand graph on double click.
-    */
+
     cy.on(
       "dbltap",
       "node",
@@ -322,7 +317,9 @@ export default function GraphCanvas({
 
         cy.batch(() => {
 
+
           expanded.nodes.forEach(newNode => {
+
 
             if(existing.has(newNode.id)) {
               return;
@@ -335,17 +332,23 @@ export default function GraphCanvas({
 
               data:{
 
-                id:newNode.id,
+                ...newNode,
 
-                label:newNode.label
+                id:
+                  newNode.id,
+
+                label:
+                  newNode.label
 
               },
+
 
               position:{
 
                 x:
                   center.x +
                   (Math.random()-0.5)*180,
+
 
                 y:
                   center.y +
@@ -355,14 +358,17 @@ export default function GraphCanvas({
 
             });
 
+
           });
 
 
 
           expanded.edges.forEach(edge => {
 
+
             const id =
               `${edge.source}-${edge.target}-${edge.label}`;
+
 
 
             if(
@@ -372,12 +378,14 @@ export default function GraphCanvas({
             }
 
 
+
             if(
               !cy.getElementById(edge.source).length ||
               !cy.getElementById(edge.target).length
             ){
               return;
             }
+
 
 
             cy.add({
@@ -404,9 +412,12 @@ export default function GraphCanvas({
 
             });
 
+
           });
 
+
         });
+
 
 
         cy.animate({
@@ -419,8 +430,10 @@ export default function GraphCanvas({
 
         });
 
+
       }
     );
+
 
 
     return () => {
@@ -438,22 +451,24 @@ export default function GraphCanvas({
 
 
 
-  /*
-    Update graph without destroying Cytoscape.
-  */
   useEffect(() => {
+
 
     const cy =
       cyRef.current;
+
 
     if(!cy){
       return;
     }
 
 
+
     cy.batch(() => {
 
+
       graph.nodes.forEach(node => {
+
 
         if(
           cy.getElementById(node.id).length
@@ -462,11 +477,14 @@ export default function GraphCanvas({
         }
 
 
+
         cy.add({
 
           group:"nodes",
 
           data:{
+
+            ...node,
 
             id:
               node.id,
@@ -478,14 +496,17 @@ export default function GraphCanvas({
 
         });
 
+
       });
 
 
 
       graph.edges.forEach(edge => {
 
+
         const id =
           `${edge.source}-${edge.target}-${edge.label}`;
+
 
 
         if(
@@ -493,6 +514,7 @@ export default function GraphCanvas({
         ){
           return;
         }
+
 
 
         cy.add({
@@ -519,9 +541,12 @@ export default function GraphCanvas({
 
         });
 
+
       });
 
+
     });
+
 
 
     cy.layout({
@@ -545,22 +570,23 @@ export default function GraphCanvas({
     }).run();
 
 
+
   }, [graph]);
 
 
 
-  /*
-    Selection handling.
-  */
   useEffect(() => {
+
 
     const cy =
       cyRef.current;
 
 
+
     if(!cy){
       return;
     }
+
 
 
     cy.elements()
@@ -569,13 +595,16 @@ export default function GraphCanvas({
       );
 
 
+
     if(!selectedId){
       return;
     }
 
 
+
     const node =
       cy.getElementById(selectedId);
+
 
 
     if(!node.length){
@@ -583,8 +612,10 @@ export default function GraphCanvas({
     }
 
 
+
     const neighbourhood =
       node.closedNeighborhood();
+
 
 
     cy.elements()
@@ -592,8 +623,10 @@ export default function GraphCanvas({
       .addClass("faded");
 
 
+
     neighbourhood
       .addClass("selected-node");
+
 
 
     cy.animate({
@@ -605,6 +638,7 @@ export default function GraphCanvas({
       duration:500
 
     });
+
 
 
   }, [selectedId]);
@@ -630,5 +664,5 @@ export default function GraphCanvas({
     />
 
   );
-}
 
+}

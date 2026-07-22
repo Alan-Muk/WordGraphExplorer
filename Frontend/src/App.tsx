@@ -9,7 +9,8 @@ import NodePanel from "./components/NodePanel";
 import { fetchGraph } from "./api/graph";
 
 import type {
-  GraphResponse
+  GraphResponse,
+  GraphNode
 } from "./types/graph";
 
 
@@ -21,7 +22,7 @@ export default function App() {
 
 
   const [selected, setSelected] =
-    useState<string | null>(null);
+    useState<GraphNode | null>(null);
 
 
 
@@ -83,11 +84,17 @@ export default function App() {
           graph &&
 
           <GraphCanvas
+
             graph={graph}
-            selectedId={selected}
-            onSelect={(node)=>
-              setSelected(node.id)
+
+            selectedId={
+              selected?.id ?? null
             }
+
+            onSelect={(node) =>
+              setSelected(node)
+            }
+
           />
 
         }
@@ -101,10 +108,7 @@ export default function App() {
           <NodePanel
 
             node={
-              graph.nodes.find(
-                node =>
-                  node.id === selected
-              ) ?? null
+              selected
             }
 
 
