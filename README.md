@@ -1,149 +1,218 @@
-# Word Graph
+# WordGraphExplorer
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white)
 ![Express](https://img.shields.io/badge/Express.js-Backend-000000?logo=express)
-![ConceptNet](https://img.shields.io/badge/API-ConceptNet-orange)
+![WordNet](https://img.shields.io/badge/Data-WordNet-orange)
+![Cytoscape](https://img.shields.io/badge/Visualization-Cytoscape.js-111111)
 ![Graph Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra-blueviolet)
+![Tests](https://img.shields.io/badge/Tests-Vitest-6E9F18)
 
-A semantic graph exploration platform that transforms natural language concepts into interactive knowledge graphs using ConceptNet, weighted graph modeling, and shortest-path algorithms.
+A semantic graph exploration platform that transforms words into interactive knowledge graphs using WordNet, weighted graph modelling, and graph traversal algorithms.
 
-The system enables users to explore relationships between concepts, discover semantic connections, and visualize reasoning paths through an interactive graph interface.
+WordGraphExplorer allows users to explore lexical relationships, navigate semantic hierarchies, discover connections between concepts, and interact with dynamically expanding graph structures.
 
 ---
 
 # Overview
 
-Word Graph is a full-stack semantic reasoning system built around dynamically generated knowledge graphs.
+WordGraphExplorer is a full-stack semantic reasoning system built around WordNet data.
 
-The system workflow:
+Instead of treating words as isolated strings, the system represents concepts as a graph:
+
+- Words and synsets become graph nodes
+- Semantic relationships become weighted edges
+- Graph algorithms discover connections and paths
+- The frontend provides interactive exploration
+
+## System Workflow
 
 ```text
-Concept Input
-      |
-      ↓
-ConceptNet API
-      |
-      ↓
-Graph Construction
-      |
-      ↓
-Weighted Knowledge Graph
-      |
-      ↓
-Dijkstra Pathfinding
-      |
-      ↓
+Word Input
+    |
+    ↓
+WordNet Lookup
+    |
+    ↓
+Synset Expansion
+    |
+    ↓
+Semantic Graph Construction
+    |
+    ↓
+Weighted Graph Model
+    |
+    ↓
+Graph Algorithms
+    |
+    ↓
 Interactive Visualization
 ```
-
-The goal is to represent semantic relationships as a navigable graph where concepts can be connected, analyzed, and explored through graph algorithms.
 
 ---
 
 # Problem
 
-Understanding relationships between concepts requires more than simple keyword matching.
+Understanding language relationships requires more than keyword matching.
 
-Traditional search systems identify related words but often fail to explain:
+Traditional search systems can find terms but often fail to explain:
 
-- Why concepts are connected
-- How concepts relate through intermediate ideas
-- Which path represents the strongest semantic relationship
+- How concepts are related
+- Which concepts belong to broader categories
+- How words connect through semantic hierarchies
+- What path exists between two concepts
 
-Word Graph addresses this by modeling concepts as weighted graphs and applying graph traversal algorithms to discover meaningful paths.
+WordGraphExplorer models language as a graph structure, enabling semantic traversal, pathfinding, and relationship analysis.
 
 ---
 
 # Architecture
 
-## System Architecture
-
 ```text
 React + TypeScript Client
           |
           |
-      Express API
+     Express API
           |
           |
-   Graph Processing Engine
+ Semantic Graph Engine
           |
           |
-   ConceptNet Knowledge Graph
+     WordNet Database
 ```
-
----
-
-# Components
 
 ## Frontend
 
-Built with React and Vite.
+Built with React, TypeScript, and Vite.
 
 Responsibilities:
 
-- Interactive graph visualization
-- User input handling
-- Path animation
-- Graph exploration interface
+- Interactive semantic graph visualization
+- Node exploration
+- Relationship highlighting
+- Graph expansion
+- Definition display
+- Semantic navigation
 
 Technologies:
 
 - React
 - TypeScript
-- Cytoscape.js
 - Vite
+- Cytoscape.js
+- Cytoscape Cola Layout
 
 ---
 
 ## Backend
 
-Built with Node.js and Express.
+Built with Node.js, Express, and TypeScript.
 
 Responsibilities:
 
-- Fetch semantic relationships
-- Construct graph structures
-- Provide graph and pathfinding APIs
-- Handle caching and retries
+- WordNet lookup
+- Synset expansion
+- Semantic graph construction
+- Relationship modelling
+- Pathfinding
+- Similarity calculation
 
-API endpoints:
+Technologies:
 
-### Build Semantic Graph
+- Node.js
+- Express
+- TypeScript
+
+---
+
+# API
+
+## Build Semantic Graph
 
 ```
 GET /graph/:word
 ```
 
-Example response:
+Example:
+
+```
+GET /graph/dog
+```
+
+Response:
 
 ```json
 {
-  "nodes": [],
-  "edges": []
+  "word": "dog",
+  "nodes": [
+    {
+      "id": "2084071.noun",
+      "label": "dog"
+    }
+  ],
+  "edges": [],
+  "stats": {
+    "nodes": 30,
+    "edges": 56
+  }
 }
 ```
 
 ---
 
-### Find Semantic Path
+## Find Semantic Path
 
 ```
 GET /path?from=word1&to=word2
 ```
 
-Example response:
+Example:
+
+```
+GET /path?from=dog&to=animal
+```
+
+Response:
+
+```json
+{
+  "start": "dog",
+  "end": "animal",
+  "path": [
+    "2084071.noun",
+    "1317541.noun"
+  ],
+  "distance": 1
+}
+```
+
+---
+
+## Calculate Similarity
+
+```
+GET /similarity?from=word1&to=word2
+```
+
+Example:
+
+```
+GET /similarity?from=dog&to=animal
+```
+
+Response:
 
 ```json
 {
   "from": "dog",
-  "to": "zoo",
+  "to": "animal",
+  "distance": 1,
+  "similarity": 0.5,
   "path": [
-    "dog",
-    "animal",
-    "zoo"
+    "2084071.noun",
+    "1317541.noun"
   ]
 }
 ```
@@ -152,83 +221,110 @@ Example response:
 
 # Core Features
 
-## Dynamic Graph Construction
+## Dynamic Semantic Graph Construction
 
-- Expands concepts using the ConceptNet API
-- Builds multi-hop semantic graphs
-- Filters irrelevant relationships
-- Creates navigable graph structures
+The backend converts WordNet synsets into graph structures.
+
+Features:
+
+- Recursive graph expansion
+- Depth-controlled traversal
+- Synset-based node modelling
+- Relationship-aware edges
+- Graph integrity validation
 
 ---
 
-## Weighted Semantic Relationships
+## Semantic Relationships
 
-Relationships are assigned weights based on semantic strength.
+WordNet relationships are represented as graph edges.
 
-Example:
+| Relationship | Meaning |
+|---|---|
+| Hypernym | Broader concept |
+| Hyponym | More specific concept |
+| Meronym | Part relationship |
+| Holonym | Whole relationship |
+| Antonym | Opposite meaning |
 
-| Relationship | Weight |
-|---|---:|
-| IsA | 1 |
-| UsedFor | 2 |
-| CapableOf | 2 |
-| HasProperty | 2 |
-| PartOf | 3 |
-| Causes | 3 |
-| RelatedTo | 5 |
-
-Lower weights represent stronger semantic connections.
+Edges are weighted according to relationship strength, allowing algorithms to prioritise meaningful connections.
 
 ---
 
 ## Graph Pathfinding
 
-The system uses Dijkstra's shortest path algorithm to determine the lowest-cost semantic path between concepts.
+The graph engine uses Dijkstra's algorithm to discover semantic paths.
 
 Example:
 
 ```text
 dog
  |
-animal
- |
-zoo
+domestic_animal
 ```
 
-The result represents the shortest semantic relationship path discovered by the graph engine.
+The algorithm calculates the lowest-cost route between concepts based on relationship weights.
 
 ---
 
 ## Interactive Visualization
 
-The frontend uses Cytoscape.js to:
+The frontend uses Cytoscape.js to provide:
 
-- Render dynamic graphs
-- Display concept relationships
-- Highlight computed paths
-- Animate traversal steps
-- Center the view around active nodes
+- Network-style graph rendering
+- Relationship colour coding
+- Node selection
+- Neighbour highlighting
+- Local graph expansion
+- Dynamic exploration
+
+Example:
+
+```text
+             canine
+
+                |
+                |
+
+puppy ---- dog ---- domestic_animal
+
+                |
+              poodle
+```
 
 ---
 
 # Technical Highlights
 
-- Built a dynamic semantic graph generation engine
-- Implemented weighted graph traversal algorithms
-- Designed recursive graph expansion with depth limits
-- Added API caching and retry handling
-- Created bidirectional graph representations
-- Built interactive visualization for algorithm explanations
+- Built a semantic graph engine from WordNet data
+- Implemented weighted graph structures
+- Created recursive graph expansion
+- Implemented Dijkstra shortest path search
+- Added semantic similarity scoring
+- Built an interactive Cytoscape graph explorer
+- Added local node expansion without rebuilding the graph
+- Designed a modular TypeScript backend architecture
 
 ---
 
 # Design Decisions
 
-## Weighted Graph Model
+## Graph-Based Language Representation
 
-Not all semantic relationships have equal meaning.
+Words are represented as nodes rather than isolated strings.
 
-The system assigns different costs to relationships to prioritize stronger connections.
+This enables:
+
+- Relationship traversal
+- Hierarchical exploration
+- Semantic distance calculations
+- Knowledge graph experimentation
+
+---
+
+## Weighted Relationships
+
+Not every relationship has equal meaning.
 
 Example:
 
@@ -236,33 +332,32 @@ Example:
 dog → animal
 ```
 
-has a stronger semantic relationship than:
+is a stronger semantic connection than unrelated associations.
 
-```
-dog → related concept
-```
+Relationship weights allow graph algorithms to prioritise meaningful paths.
 
 ---
 
-## Recursive Graph Expansion
+## Local Graph Expansion
 
-The graph builder expands concepts recursively while controlling:
+Large semantic graphs quickly become difficult to navigate.
 
-- Maximum traversal depth
-- API usage
-- Graph size
+The explorer expands concepts locally:
 
-This balances exploration depth with performance.
+```text
+Double click node
+        |
+        ↓
+Fetch neighbours
+        |
+        ↓
+Add concepts
+        |
+        ↓
+Continue exploring
+```
 
----
-
-## Caching Strategy
-
-External API requests are cached to:
-
-- Reduce repeated ConceptNet calls
-- Improve response time
-- Increase reliability
+This keeps visualisation manageable while allowing discovery.
 
 ---
 
@@ -274,91 +369,139 @@ External API requests are cached to:
 - TypeScript
 - Vite
 - Cytoscape.js
+- Cytoscape Cola Layout
 
 ## Backend
 
 - Node.js
 - Express
-- Axios
+- TypeScript
 
 ## Data Source
 
-- ConceptNet API
+- WordNet
 
 ## Algorithms
 
 - Graph traversal
 - Weighted graphs
 - Dijkstra shortest path
+- Similarity scoring
 
 ---
 
 # How It Works
 
-1. User enters a concept.
-2. Backend requests related concepts from ConceptNet.
-3. The graph builder converts relationships into nodes and edges.
-4. Relationships receive semantic weights.
-5. Dijkstra's algorithm calculates the lowest-cost path.
-6. React visualizes the resulting graph and reasoning path.
+1. User enters a word
+2. Backend queries WordNet
+3. Synsets are converted into graph nodes
+4. Semantic relationships become weighted edges
+5. Graph algorithms analyse connections
+6. React renders the interactive graph
+7. Users expand and explore related concepts
+
+---
+
+# Example Exploration
+
+Starting from:
+
+```
+dog
+```
+
+The explorer discovers:
+
+```
+dog
+
+├── canine
+├── domestic_animal
+├── puppy
+├── poodle
+└── hunting_dog
+```
+
+Users can continue expanding individual concepts.
 
 ---
 
 # Example Use Cases
 
-- Semantic relationship exploration
+- Semantic exploration
 - Knowledge graph visualization
 - Educational graph algorithm demonstrations
-- Graph-based AI preprocessing
-- GraphRAG-style experimentation
+- Linguistic analysis
+- Graph-based AI experiments
+- GraphRAG research prototypes
 
 ---
 
 # Challenges
 
-## Large Graph Expansion
+## Graph Growth
 
-Expanding concepts can quickly create large graphs.
+Semantic graphs can quickly become large.
 
 Solution:
 
-- Depth-limited traversal
-- Relationship filtering
-- Caching
+- Depth limits
+- Local expansion
+- Selective traversal
 
 ---
 
-## Semantic Ranking
+## Semantic Relationships
 
-Different ConceptNet relationships have different meanings.
+Language relationships are not equally meaningful.
 
 Solution:
 
-- Custom relationship weighting system
-- Priority-based traversal
+- Relationship weighting
+- Graph-based ranking
+- Path scoring
 
 ---
 
-## Visualization Performance
+## Visualization Complexity
 
-Large graphs can become difficult to navigate.
+Large graphs become difficult to interpret.
 
 Solution:
 
-- Interactive rendering
-- Selective path highlighting
-- Dynamic graph updates
+- Interactive exploration
+- Node highlighting
+- Local expansion
+- Relationship colouring
+
+---
+
+# Testing
+
+The backend includes automated tests covering the core graph engine and semantic operations.
+
+Test coverage includes:
+
+- WordNet lookup
+- Semantic graph expansion
+- Graph construction
+- Edge integrity validation
+- Relationship handling
+- Priority queue behaviour
+- Dijkstra shortest path
+- Semantic similarity scoring
 
 ---
 
 # Future Improvements
 
-- Add LRU/TTL cache management
-- Implement A* pathfinding
-- Add human-readable edge explanations
-- Introduce streaming graph updates
-- Add AI-generated semantic explanations
-- Improve graph ranking algorithms
+- Add edge explanation tooltips
+- Add graph export/import
+- Add A* pathfinding
+- Add embeddings for semantic similarity
+- Add graph persistence
+- Add AI-generated explanations
+- Improve ranking algorithms
 
 ---
 
@@ -367,25 +510,24 @@ Solution:
 ## Clone Repository
 
 ```bash
-git clone https://github.com/Alan-Muk/Word-Graph
-cd Word-Graph
-```
+git clone https://github.com/Alan-Muk/WordGraphExplorer
 
----
+cd WordGraphExplorer
+```
 
 ## Install Dependencies
 
-Backend:
+### Backend
 
 ```bash
-cd server
+cd Backend
 npm install
 ```
 
-Frontend:
+### Frontend
 
 ```bash
-cd client
+cd Frontend
 npm install
 ```
 
@@ -408,7 +550,6 @@ http://localhost:3001
 ## Start Frontend
 
 ```bash
-cd client
 npm run dev
 ```
 
@@ -417,6 +558,13 @@ Frontend runs on:
 ```
 http://localhost:5173
 ```
+
+---
+
+<img width="1366" height="768" alt="Screenshot From 2026-07-22 14-21-10" src="https://github.com/user-attachments/assets/897593c3-7a9a-434b-8a2f-8030ec7d890b" />
+<img width="1366" height="768" alt="Screenshot From 2026-07-22 14-20-46" src="https://github.com/user-attachments/assets/9325ffb2-4213-4405-9222-3eeed5faed77" />
+<img width="1366" height="768" alt="Screenshot From 2026-07-22 14-20-39" src="https://github.com/user-attachments/assets/04227fa8-b798-422d-9294-364e7318a0ad" />
+
 
 ---
 
