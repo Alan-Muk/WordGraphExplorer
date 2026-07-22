@@ -1,45 +1,62 @@
 import { Router } from "express";
-import { normalize } from "../util/normalise";
-import { expandGraph } from "../graph/expand";
+import normalise from "../util/normalise";
+import { SemanticGraphService } from "../services/SemanticGraphService";
 
 const router = Router();
 
+const service = new SemanticGraphService();
+
+
 router.get("/:word", async (req, res) => {
+
   try {
-    const word = normalize(req.params.word);
 
-    const graph = await expandGraph(word, 2);
+    const word =
+      normalise(req.params.word);
 
-    const data = await fetchNode(word);
 
-    if (!data || data.error) {
-      return {
-        nodes: [
-          { data: { id: word, label: word } }
-        ],
-        edges: []
-      };
-    }
+    const depthValue =
+      Number(req.query.depth ?? 2);
 
-    res.json(graph);
+
+    const depth =
+      Number.isFinite(depthValue) &&
+      depthValue > 0
+        ? Math.min(depthValue, 5)
+        : 2;
+
+
+    const graph =
+      await service.build(
+        word,
+        depth
+      );
+
+
+    res.json({
+
+      word,
+
+      ...graph.toJSON(),
+
+      stats:
+        graph.getStats()
+
+    });
+
+
   } catch (err: any) {
+
     console.error(err.message);
 
-    res.status(503).json({
-      error: "Graph expansion failed"
+
+    res.status(404).json({
+      error: "Word graph unavailable"
     });
+
   }
+
 });
 
-export default router;
 
-/* --------------------------------------------------------------------------
- * End of graph route
- *
- * Route summary:
- * - Normalizes the requested word.
- * - Expands the graph from the starting node.
- * - Returns a fallback graph if the node cannot be found.
- * - Responds with a 503 error if graph expansion fails unexpectedly.
- *
- * -------------------------------------------------------------------------- */
+export default router;

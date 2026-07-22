@@ -1,8 +1,8 @@
-export function normalize(word: string) {
+export default function normalise(word: string) {
   return word
-    .trim()
     .toLowerCase()
-    .replace(/\s+/g, "_");
+    .replace(/^["']|["']$/g, "")
+    .trim();
 }
 
 /* --------------------------------------------------------------------------
