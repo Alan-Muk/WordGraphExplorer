@@ -1,0 +1,26 @@
+{
+  "name": "wordgraphexplorer",
+  "version": "1.0.0",
+  "description": "![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white) ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black) ![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-22-339933?logo=node.js&logoColor=white) ![Express](https://img.shields.io/badge/Express.js-Backend-000000?logo=express) ![ConceptNet](https://img.shields.io/badge/API-ConceptNet-orange) ![Graph Algorithms](https://img.shields.io/badge/Algorithms-Dijkstra-blueviolet)",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alan-Muk/Word-Graph.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alan-Muk/Word-Graph/issues"
+  },
+  "homepage": "https://github.com/Alan-Muk/Word-Graph#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
