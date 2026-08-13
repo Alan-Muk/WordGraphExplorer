@@ -22,3 +22,11 @@ export function relationWeight(
   );
 
 }
+
+/*
+ * Defines the weight assigned to each type of relationship in the graph.
+ * Lower weights represent stronger or more closely related relationships.
+ *
+ * relationWeight() returns the configured weight for a given relation type
+ * and falls back to the unknown relation weight when the type is not recognized.
+ */
