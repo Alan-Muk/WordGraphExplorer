@@ -47,3 +47,18 @@ export interface GraphResponse {
   };
 
 }
+
+/*
+ * Graph data type definitions:
+ *
+ * GraphNode represents a word or concept in the graph, including
+ * optional linguistic information such as definitions, examples,
+ * part of speech, synsets, and lemmas.
+ *
+ * GraphEdge represents a relationship between two graph nodes,
+ * including the relationship label and its weight.
+ *
+ * GraphResponse represents the complete graph returned by the API,
+ * containing the requested word, its nodes and edges, and summary
+ * statistics for the total number of nodes and edges.
+ */
