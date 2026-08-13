@@ -1,8 +1,6 @@
 import { RelationType } from "./Relations";
 
-
 export interface Synset {
-
   id: string;
 
   word: string;
@@ -12,7 +10,6 @@ export interface Synset {
   definition: string;
 
   relations: SynsetRelation[];
-
 }
 
 export interface SynsetRelation {

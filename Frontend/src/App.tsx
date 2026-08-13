@@ -8,138 +8,59 @@ import NodePanel from "./components/NodePanel";
 
 import { fetchGraph } from "./api/graph";
 
-import type {
-  GraphResponse,
-  GraphNode
-} from "./types/graph";
-
+import type { GraphResponse, GraphNode } from "./types/graph";
 
 export default function App() {
+  const [graph, setGraph] = useState<GraphResponse | null>(null);
 
+  const [selected, setSelected] = useState<GraphNode | null>(null);
 
-  const [graph, setGraph] =
-    useState<GraphResponse | null>(null);
-
-
-  const [selected, setSelected] =
-    useState<GraphNode | null>(null);
-
-
-
-  async function search(
-    word: string,
-    depth: number
-  ) {
-
-    const result =
-      await fetchGraph(
-        word,
-        depth
-      );
-
+  async function search(word: string, depth: number) {
+    const result = await fetchGraph(word, depth);
 
     setGraph(result);
 
     // clear old selection
     setSelected(null);
-
   }
 
-
-
   return (
-
     <div className="app">
+      <Toolbar onSearch={search} />
 
-
-      <Toolbar
-        onSearch={search}
-      />
-
-
-
-      {
-        graph &&
-
+      {graph && (
         <StatsCard
+          nodes={graph.stats.nodes}
 
-          nodes={
-            graph.stats.nodes
-          }
-
-          edges={
-            graph.stats.edges
-          }
-
+          edges={graph.stats.edges}
         />
-
-      }
-
-
+      )}
 
       <div className="canvas">
-
-
-        {
-          graph &&
-
+        {graph && (
           <GraphCanvas
-
             graph={graph}
 
-            selectedId={
-              selected?.id ?? null
-            }
+            selectedId={selected?.id ?? null}
 
-            onSelect={(node) =>
-              setSelected(node)
-            }
-
+            onSelect={(node) => setSelected(node)}
           />
+        )}
 
-        }
-
-
-
-        {
-          selected &&
-          graph &&
-
+        {selected && graph && (
           <NodePanel
+            node={selected}
 
-            node={
-              selected
-            }
+            nodes={graph.nodes}
 
+            edges={graph.edges}
 
-            nodes={
-              graph.nodes
-            }
-
-
-            edges={
-              graph.edges
-            }
-
-
-            onClose={() =>
-              setSelected(null)
-            }
-
+            onClose={() => setSelected(null)}
           />
-
-        }
-
-
+        )}
       </div>
 
-
-
       <Legend />
-
-
     </div>
-
   );
-
 }

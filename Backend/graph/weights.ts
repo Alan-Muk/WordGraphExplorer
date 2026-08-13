@@ -1,6 +1,5 @@
 import { RelationType } from "../models/Relations";
 
-
 export const RelationWeights: Record<RelationType, number> = {
   synonym: 1,
   hypernym: 1,
@@ -11,16 +10,8 @@ export const RelationWeights: Record<RelationType, number> = {
   unknown: 5,
 };
 
-
-export function relationWeight(
-  type: string
-): number {
-
-  return (
-    RelationWeights[type as RelationType]
-    ?? RelationWeights.unknown
-  );
-
+export function relationWeight(type: string): number {
+  return RelationWeights[type as RelationType] ?? RelationWeights.unknown;
 }
 
 /*

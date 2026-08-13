@@ -23,6 +23,6 @@ app.listen(3001, () => {
 app.get("/", (req, res) => {
   res.json({
     name: "Word Graph API",
-    status: "running"
+    status: "running",
   });
 });

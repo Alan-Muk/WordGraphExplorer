@@ -3,28 +3,18 @@ interface Props {
   edges: number;
 }
 
-
-export default function StatsCard({
-  nodes,
-  edges
-}: Props) {
-
+export default function StatsCard({ nodes, edges }: Props) {
   return (
-
     <div className="stats">
-
       <div>
         Nodes
         <strong>{nodes}</strong>
       </div>
 
-
       <div>
         Edges
         <strong>{edges}</strong>
       </div>
-
     </div>
-
   );
 }

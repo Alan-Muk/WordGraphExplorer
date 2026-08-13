@@ -1,5 +1,4 @@
 declare module "wordnet" {
-
   interface WordNetSense {
     synsetOffset: number;
     pos: string;
@@ -7,16 +6,9 @@ declare module "wordnet" {
     lemma: string;
   }
 
-
   interface WordNet {
-    lookup(
-      word: string,
-      callback: (
-        results: WordNetSense[]
-      ) => void
-    ): void;
+    lookup(word: string, callback: (results: WordNetSense[]) => void): void;
   }
-
 
   const wordnet: WordNet;
 

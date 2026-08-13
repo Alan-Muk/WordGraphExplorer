@@ -1,5 +1,4 @@
 export interface SynsetNode {
-
   id: string;
 
   word: string;
@@ -7,5 +6,4 @@ export interface SynsetNode {
   pos: string;
 
   definition: string;
-
 }

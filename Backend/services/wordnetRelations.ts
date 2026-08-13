@@ -1,11 +1,7 @@
 import { RelationType } from "../models/Relations";
 
-export function mapPointer(
-  symbol: string
-): Relation | null {
-
+export function mapPointer(symbol: string): Relation | null {
   switch (symbol) {
-
     case "@":
       return "hypernym";
 
@@ -28,5 +24,4 @@ export function mapPointer(
     default:
       return null;
   }
-
 }

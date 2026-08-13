@@ -6,48 +6,29 @@ const router = Router();
 
 const service = new WordNetService();
 
-
 router.get("/", async (req, res) => {
-
   try {
-
-    const word =
-      normalise(
-        req.query.word as string
-      );
-
+    const word = normalise(req.query.word as string);
 
     if (!word) {
-
       return res.status(400).json({
-        error: "Missing word"
+        error: "Missing word",
       });
-
     }
 
-
-    const results =
-      await service.lookup(word);
-
+    const results = await service.lookup(word);
 
     res.json({
       word,
-      results
+      results,
     });
-
-
   } catch (err: any) {
-
     console.error(err.message);
 
-
     res.status(500).json({
-      error: "Search failed"
+      error: "Search failed",
     });
-
   }
-
 });
-
 
 export default router;

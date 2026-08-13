@@ -3,133 +3,65 @@ import { GraphBuilder } from "../engine/GraphBuilder";
 import { Graph } from "../engine/Graph";
 import { dijkstra } from "../engine/Dijkstra";
 
-
 export class SemanticGraphService {
-
   private wordnet: WordNetService;
   private builder: GraphBuilder;
-
 
   constructor() {
     this.wordnet = new WordNetService();
     this.builder = new GraphBuilder();
   }
 
-
-  async build(
-    word: string,
-    depth = 2
-  ): Promise<Graph> {
-
-    const synsets =
-      await this.wordnet.expand(
-        word,
-        depth
-      );
-
+  async build(word: string, depth = 2): Promise<Graph> {
+    const synsets = await this.wordnet.expand(word, depth);
 
     if (synsets.length === 0) {
       throw new Error("Word not found");
     }
 
-
-    return this.builder.build(
-      synsets
-    );
-
+    return this.builder.build(synsets);
   }
 
+  async path(start: string, end: string, depth = 3) {
+    const graph = await this.build(start, depth);
 
-  async path(
-    start: string,
-    end: string,
-    depth = 3
-  ) {
+    const startNode = graph
+      .getNodes()
+      .find((node) => node.label.toLowerCase().includes(start.toLowerCase()));
 
-    const graph =
-      await this.build(
-        start,
-        depth
-      );
-
-
-    const startNode =
-      graph.getNodes()
-        .find(
-          node =>
-            node.label
-              .toLowerCase()
-              .includes(
-                start.toLowerCase()
-              )
-        );
-
-
-    const endNode =
-      graph.getNodes()
-        .find(
-          node =>
-            node.label
-              .toLowerCase()
-              .includes(
-                end.toLowerCase()
-              )
-        );
-
+    const endNode = graph
+      .getNodes()
+      .find((node) => node.label.toLowerCase().includes(end.toLowerCase()));
 
     if (!startNode || !endNode) {
-
       return {
         start,
         end,
         path: [],
-        distance: Infinity
+        distance: Infinity,
       };
-
     }
 
-
-    const result =
-      dijkstra(
-        graph,
-        startNode.id,
-        endNode.id
-      );
-
+    const result = dijkstra(graph, startNode.id, endNode.id);
 
     return {
-
       start,
 
       end,
 
-      distance:
-        result.distance,
+      distance: result.distance,
 
+      path: result.path.map((id) => {
+        const node = graph.getNode(id);
 
-      path:
-        result.path.map(id => {
+        return {
+          id,
 
-          const node =
-            graph.getNode(id);
+          label: node?.label,
 
-
-          return {
-
-            id,
-
-            label:
-              node?.label,
-
-            definition:
-              node?.definition
-
-          };
-
-        })
-
+          definition: node?.definition,
+        };
+      }),
     };
-
   }
-
 }

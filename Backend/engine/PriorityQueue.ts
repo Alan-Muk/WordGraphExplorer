@@ -31,76 +31,73 @@ export class PriorityQueue {
     return this.heap.length;
   }
 
-private bubbleUp() {
-  let index = this.heap.length - 1;
+  private bubbleUp() {
+    let index = this.heap.length - 1;
 
-  while (index > 0) {
-    const parent = Math.floor((index - 1) / 2);
+    while (index > 0) {
+      const parent = Math.floor((index - 1) / 2);
 
-    const currentNode = this.heap[index];
-    const parentNode = this.heap[parent];
+      const currentNode = this.heap[index];
+      const parentNode = this.heap[parent];
 
-    if (!currentNode || !parentNode) {
-      break;
+      if (!currentNode || !parentNode) {
+        break;
+      }
+
+      if (parentNode.priority <= currentNode.priority) {
+        break;
+      }
+
+      this.heap[parent] = currentNode;
+      this.heap[index] = parentNode;
+
+      index = parent;
     }
-
-    if (parentNode.priority <= currentNode.priority) {
-      break;
-    }
-
-    this.heap[parent] = currentNode;
-    this.heap[index] = parentNode;
-
-    index = parent;
   }
-}
 
-private bubbleDown() {
-  let index = 0;
+  private bubbleDown() {
+    let index = 0;
 
-  while (true) {
-    let smallest = index;
+    while (true) {
+      let smallest = index;
 
-    const left = index * 2 + 1;
-    const right = index * 2 + 2;
+      const left = index * 2 + 1;
+      const right = index * 2 + 2;
 
-    const current = this.heap[index];
+      const current = this.heap[index];
 
-    if (!current) {
-      break;
+      if (!current) {
+        break;
+      }
+
+      const leftNode = this.heap[left];
+
+      if (leftNode && leftNode.priority < current.priority) {
+        smallest = left;
+      }
+
+      const smallestNode = this.heap[smallest];
+      const rightNode = this.heap[right];
+
+      if (
+        rightNode &&
+        smallestNode &&
+        rightNode.priority < smallestNode.priority
+      ) {
+        smallest = right;
+      }
+
+      if (smallest === index) {
+        break;
+      }
+
+      const temp = this.heap[index];
+      this.heap[index] = this.heap[smallest]!;
+      this.heap[smallest] = temp!;
+
+      index = smallest;
     }
-
-    const leftNode = this.heap[left];
-
-    if (
-      leftNode &&
-      leftNode.priority < current.priority
-    ) {
-      smallest = left;
-    }
-
-    const smallestNode = this.heap[smallest];
-    const rightNode = this.heap[right];
-
-    if (
-      rightNode &&
-      smallestNode &&
-      rightNode.priority < smallestNode.priority
-    ) {
-      smallest = right;
-    }
-
-    if (smallest === index) {
-      break;
-    }
-
-    const temp = this.heap[index];
-    this.heap[index] = this.heap[smallest]!;
-    this.heap[smallest] = temp!;
-
-    index = smallest;
   }
-}
 }
 
 /*

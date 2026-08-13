@@ -7,21 +7,20 @@ describe("Graph", () => {
 
     graph.addNode({
       id: "dog",
-      label: "dog"
+      label: "dog",
     });
 
     graph.addNode({
       id: "animal",
-      label: "animal"
+      label: "animal",
     });
 
     graph.addEdge({
       source: "dog",
       target: "animal",
       relation: "hypernym",
-      weight: 2
+      weight: 2,
     });
-
 
     expect(graph.getNode("dog")).toBeDefined();
 

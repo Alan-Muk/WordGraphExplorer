@@ -2,95 +2,58 @@ import { Graph } from "./Graph";
 import { Synset } from "../models/Synset";
 import { relationWeight } from "../graph/weights";
 
-
 export class GraphBuilder {
-
-  build(
-    synsets: Synset[]
-  ): Graph {
-
-    const graph =
-      new Graph();
-
+  build(synsets: Synset[]): Graph {
+    const graph = new Graph();
 
     // Add all nodes first
     for (const synset of synsets) {
-
       graph.addNode({
         id: synset.id,
         label: synset.word,
-        definition: synset.definition
+        definition: synset.definition,
       });
-
     }
 
-
     // Add relations as edges
-// Add relations as edges
-for (const synset of synsets) {
+    // Add relations as edges
+    for (const synset of synsets) {
+      for (const relation of synset.relations) {
+        const weight = relationWeight(relation.type);
 
-  for (const relation of synset.relations) {
+        // Ensure target node exists
+        graph.addNode({
+          id: relation.target.id,
 
-    const weight =
-      relationWeight(
-        relation.type
-      );
+          label: relation.target.lemma,
 
+          definition: relation.target.definition,
+        });
 
-    // Ensure target node exists
-    graph.addNode({
+        graph.addEdge({
+          source: synset.id,
 
-      id:
-        relation.target.id,
+          target: relation.target.id,
 
-      label:
-        relation.target.lemma,
+          label: relation.type,
 
-      definition:
-        relation.target.definition
+          weight,
+        });
 
-    });
+        // Reverse edge for traversal
+        graph.addEdge({
+          source: relation.target.id,
 
+          target: synset.id,
 
-    graph.addEdge({
+          label: relation.type,
 
-      source:
-        synset.id,
-
-      target:
-        relation.target.id,
-
-      label:
-        relation.type,
-
-      weight
-
-    });
-
-
-    // Reverse edge for traversal
-    graph.addEdge({
-
-      source:
-        relation.target.id,
-
-      target:
-        synset.id,
-
-      label:
-        relation.type,
-
-      weight
-
-    });
-
-  }
-
-}
+          weight,
+        });
+      }
+    }
     return graph;
-
   }
-
 }
 
 /*

@@ -1,5 +1,4 @@
 export interface GraphNode {
-
   id: string;
 
   label: string;
@@ -13,12 +12,9 @@ export interface GraphNode {
   synset?: string;
 
   lemmas?: string[];
-
 }
 
-
 export interface GraphEdge {
-
   source: string;
 
   target: string;
@@ -26,12 +22,9 @@ export interface GraphEdge {
   label: string;
 
   weight: number;
-
 }
 
-
 export interface GraphResponse {
-
   word: string;
 
   nodes: GraphNode[];
@@ -39,13 +32,10 @@ export interface GraphResponse {
   edges: GraphEdge[];
 
   stats: {
-
     nodes: number;
 
     edges: number;
-
   };
-
 }
 
 /*
