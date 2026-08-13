@@ -19,3 +19,14 @@ export async function fetchGraph(
   return response.json();
 
 }
+
+
+/**
+ * Fetches a graph of related words from the API.
+ *
+ * @param word - The word to use as the starting point of the graph.
+ * @param depth - The depth of the graph traversal. Defaults to 2.
+ * @returns A promise containing the graph data returned by the API.
+ * @throws {Error} If the API request fails.
+ */
+
