@@ -23,7 +23,7 @@ export class SimilarityService {
   async compare(
     from: string,
     to: string,
-    depth = 3,
+    depth = 5,
   ): Promise<SimilarityResult> {
     const graph = await this.graphService.build(from, depth);
 

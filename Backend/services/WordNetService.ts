@@ -35,7 +35,7 @@ export class WordNetService {
     }
   }
 
-  async expand(word: string, depth = 2): Promise<Synset[]> {
+  async expand(word: string, depth = 5): Promise<Synset[]> {
     await ensureInitialized();
 
     const visited = new Set<number>();

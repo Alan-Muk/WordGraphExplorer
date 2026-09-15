@@ -12,7 +12,7 @@ export class SemanticGraphService {
     this.builder = new GraphBuilder();
   }
 
-  async build(word: string, depth = 2): Promise<Graph> {
+  async build(word: string, depth = 5): Promise<Graph> {
     const synsets = await this.wordnet.expand(word, depth);
 
     if (synsets.length === 0) {
@@ -22,7 +22,7 @@ export class SemanticGraphService {
     return this.builder.build(synsets);
   }
 
-  async path(start: string, end: string, depth = 3) {
+  async path(start: string, end: string, depth = 5) {
     const graph = await this.build(start, depth);
 
     const startNode = graph

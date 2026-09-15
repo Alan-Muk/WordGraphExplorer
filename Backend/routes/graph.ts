@@ -10,7 +10,7 @@ router.get("/:word", async (req, res) => {
   try {
     const word = normalise(req.params.word);
 
-    const depthValue = Number(req.query.depth ?? 2);
+    const depthValue = Number(req.query.depth ?? 5);
 
     const depth =
       Number.isFinite(depthValue) && depthValue > 0

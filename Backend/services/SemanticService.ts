@@ -6,7 +6,7 @@ export class SemanticService {
   constructor(private wordnet = new WordNetService()) {}
 
   async path(from: string, to: string) {
-    const graphData = await this.wordnet.expand(from, 3);
+    const graphData = await this.wordnet.expand(from, 5);
 
     const graph = GraphBuilder.build(graphData);
 
