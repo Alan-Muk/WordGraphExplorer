@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: word-graph-backend
+    runtime: docker
+    plan: free
+    region: frankfurt
+    rootDir: Backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: https://alan-muk.github.io,http://localhost:5173
+      - key: PORT
+        value: "3001"
