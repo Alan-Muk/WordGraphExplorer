@@ -1,20 +1,66 @@
+import type {
+  GraphResponse,
+  PathResponse,
+  SimilarityResponse,
+  SearchResponse,
+} from "../types/graph";
+
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
 
-export async function fetchGraph(word: string, depth = 5) {
-  const response = await fetch(`${API}/graph/${word}?depth=${depth}`);
+/**
+ * Throws an `Error` with a human-readable message for the common cases:
+ * 404 (not found), other non-OK statuses, network failure, and invalid JSON.
+ */
+async function request<T>(url: string): Promise<T> {
+  let response: Response;
 
-  if (!response.ok) {
-    throw new Error("Graph fetch failed");
+  try {
+    response = await fetch(url);
+  } catch {
+    throw new Error("Cannot reach the server");
   }
 
-  return response.json();
+  if (response.status === 404) {
+    throw new Error("Not found");
+  }
+
+  if (!response.ok) {
+    throw new Error(`Request failed (${response.status})`);
+  }
+
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 }
 
-/**
- * Fetches a graph of related words from the API.
- *
- * @param word - The word to use as the starting point of the graph.
- * @param depth - The depth of the graph traversal. Defaults to 2.
- * @returns A promise containing the graph data returned by the API.
- * @throws {Error} If the API request fails.
- */
+export async function fetchGraph(
+  word: string,
+  depth = 2,
+): Promise<GraphResponse> {
+  return request<GraphResponse>(
+    `${API}/graph/${encodeURIComponent(word)}?depth=${depth}`,
+  );
+}
+
+export async function fetchPath(
+  from: string,
+  to: string,
+): Promise<PathResponse> {
+  const params = new URLSearchParams({ from, to });
+  return request<PathResponse>(`${API}/path?${params}`);
+}
+
+export async function fetchSimilarity(
+  from: string,
+  to: string,
+): Promise<SimilarityResponse> {
+  const params = new URLSearchParams({ from, to });
+  return request<SimilarityResponse>(`${API}/similarity?${params}`);
+}
+
+export async function searchWord(word: string): Promise<SearchResponse> {
+  const params = new URLSearchParams({ word });
+  return request<SearchResponse>(`${API}/search?${params}`);
+}

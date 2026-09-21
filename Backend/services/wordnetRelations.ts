@@ -1,6 +1,6 @@
 import { RelationType } from "../models/Relations";
 
-export function mapPointer(symbol: string): Relation | null {
+export function mapPointer(symbol: string): RelationType | null {
   switch (symbol) {
     case "@":
       return "hypernym";
@@ -8,14 +8,14 @@ export function mapPointer(symbol: string): Relation | null {
     case "~":
       return "hyponym";
 
-    case "%p":
-    case "%m":
-    case "%s":
-      return "meronym";
-
     case "#p":
     case "#m":
     case "#s":
+      return "meronym";
+
+    case "%p":
+    case "%m":
+    case "%s":
       return "holonym";
 
     case "!":

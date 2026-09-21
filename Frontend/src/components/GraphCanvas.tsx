@@ -4,6 +4,7 @@ import cola from "cytoscape-cola";
 
 import { fetchGraph } from "../api/graph";
 import type { GraphResponse, GraphNode } from "../types/graph";
+import { RELATION_COLORS } from "../constants/relations";
 
 cytoscape.use(cola);
 
@@ -21,6 +22,15 @@ export default function GraphCanvas({ graph, selectedId, onSelect }: Props) {
   const onSelectRef = useRef(onSelect);
 
   const destroyedRef = useRef(false);
+  const relationStyles = Object.entries(RELATION_COLORS).map(
+    ([label, color]) => ({
+      selector: `edge[label="${label}"]`,
+      style: {
+        "line-color": color,
+        "target-arrow-color": color,
+      },
+    }),
+  );
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -79,51 +89,13 @@ export default function GraphCanvas({ graph, selectedId, onSelect }: Props) {
           },
         },
 
-        {
-          selector: 'edge[label="hypernym"]',
-
+        ...Object.entries(RELATION_COLORS).map(([label, color]) => ({
+          selector: `edge[label="${label}"]`,
           style: {
-            "line-color": "#38bdf8",
-            "target-arrow-color": "#38bdf8",
+            "line-color": color,
+            "target-arrow-color": color,
           },
-        },
-
-        {
-          selector: 'edge[label="hyponym"]',
-
-          style: {
-            "line-color": "#22c55e",
-            "target-arrow-color": "#22c55e",
-          },
-        },
-
-        {
-          selector: 'edge[label="meronym"]',
-
-          style: {
-            "line-color": "#fb923c",
-            "target-arrow-color": "#fb923c",
-          },
-        },
-
-        {
-          selector: 'edge[label="holonym"]',
-
-          style: {
-            "line-color": "#c084fc",
-            "target-arrow-color": "#c084fc",
-          },
-        },
-
-        {
-          selector: 'edge[label="antonym"]',
-
-          style: {
-            "line-color": "#ef4444",
-            "target-arrow-color": "#ef4444",
-          },
-        },
-
+        })),
         {
           selector: ".highlight",
 
@@ -284,49 +256,26 @@ export default function GraphCanvas({ graph, selectedId, onSelect }: Props) {
 
   useEffect(() => {
     const cy = cyRef.current;
+    if (!cy) return;
 
-    if (!cy) {
-      return;
-    }
+    cy.elements().remove();
 
     cy.batch(() => {
       graph.nodes.forEach((node) => {
-        if (cy.getElementById(node.id).length) {
-          return;
-        }
-
         cy.add({
           group: "nodes",
-
-          data: {
-            ...node,
-
-            id: node.id,
-
-            label: node.label,
-          },
+          data: { ...node, id: node.id, label: node.label },
         });
       });
-
       graph.edges.forEach((edge) => {
         const id = `${edge.source}-${edge.target}-${edge.label}`;
-
-        if (cy.getElementById(id).length) {
-          return;
-        }
-
         cy.add({
           group: "edges",
-
           data: {
             id,
-
             source: edge.source,
-
             target: edge.target,
-
             label: edge.label,
-
             weight: edge.weight,
           },
         });
@@ -335,19 +284,12 @@ export default function GraphCanvas({ graph, selectedId, onSelect }: Props) {
 
     cy.layout({
       name: "cola",
-
       animate: true,
-
       fit: true,
-
       padding: 50,
-
       avoidOverlap: true,
-
       edgeLength: 120,
-
       nodeSpacing: 25,
-
       maxSimulationTime: 2000,
     }).run();
   }, [graph]);

@@ -17,20 +17,18 @@ async function ensureInitialized() {
 export class WordNetService {
   async lookup(word: string): Promise<Synset[]> {
     await ensureInitialized();
-
+    let definitions;
     try {
-      const definitions = await wordnet.lookup(word);
-
-      return definitions.map((definition, index) => ({
-        id: `${word}.${index}`,
-
-        word,
-
-        definition: definition.glossary,
-
+      definitions = await wordnet.lookup(word);
+      return definitions.map((definition) => ({
+        id: `${definition.meta.synsetOffset}.${definition.meta.synsetType}`,
+        word: definition.meta.words?.[0]?.word ?? word,
+        pos: definition.meta.synsetType,
+        definition: definition.glossary ?? "",
         relations: [],
       }));
-    } catch {
+    } catch (err) {
+      console.error(`WordNet lookup failed for "${word}":`, err);
       return [];
     }
   }
@@ -38,71 +36,63 @@ export class WordNetService {
   async expand(word: string, depth = 5): Promise<Synset[]> {
     await ensureInitialized();
 
-    const visited = new Set<number>();
+    let definitions;
+    try {
+      definitions = await wordnet.lookup(word);
+    } catch (err) {
+      console.error(`WordNet lookup failed for "${word}":`, err);
+      return [];
+    }
 
+    if (!definitions || definitions.length === 0) return [];
+
+    const visited = new Set<string>();
     const results: Synset[] = [];
 
     const walk = async (definition: any, level: number): Promise<void> => {
       const offset = definition?.meta?.synsetOffset;
+      const type = definition?.meta?.synsetType;
+      if (offset === undefined || type === undefined) return;
 
-      if (offset === undefined || visited.has(offset) || level > depth) {
-        return;
-      }
-
-      visited.add(offset);
-
-      const synsetId = `${offset}.${definition.meta.synsetType}`;
+      const synsetId = `${offset}.${type}`;
+      if (visited.has(synsetId) || level > depth) return;
+      visited.add(synsetId);
 
       const synset: Synset = {
         id: synsetId,
-
         word: definition.meta.words?.[0]?.word ?? word,
-
+        pos: type,
         definition: definition.glossary ?? "",
-
         relations: [],
       };
-
       results.push(synset);
 
       const pointers = definition.meta?.pointers ?? [];
-
       for (const pointer of pointers) {
         const relation = mapPointer(pointer.pointerSymbol);
-
-        if (!relation) {
-          continue;
-        }
+        if (!relation) continue;
 
         const target = pointer.data;
+        if (!target?.meta) continue;
 
-        if (!target?.meta) {
-          continue;
-        }
-
-        const targetId = `${target.meta.synsetOffset}.${target.meta.synsetType}`;
-
-        const targetNode: Synset = {
-          id: targetId,
-
-          word: target.meta.words?.[0]?.word ?? "",
-
-          definition: target.glossary ?? "",
-
-          relations: [],
-        };
+        const targetOffset = target.meta.synsetOffset;
+        const targetType = target.meta.synsetType;
+        const targetId = `${targetOffset}.${targetType}`;
 
         synset.relations.push({
           type: relation,
-
-          target: targetNode,
+          target: {
+            id: targetId,
+            word: target.meta.words?.[0]?.word ?? "",
+            pos: targetType,
+            definition: target.glossary ?? "",
+            relations: [],
+          },
         });
 
         await walk(target, level + 1);
       }
     };
-
-    const definitions = await wordnet.lookup(word);
 
     for (const definition of definitions) {
       await walk(definition, 0);

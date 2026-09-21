@@ -1,16 +1,37 @@
 declare module "wordnet" {
-  interface WordNetSense {
+  interface WordNetWord {
+    word: string;
+    lexId: number;
+  }
+
+  interface WordNetPointer {
+    pointerSymbol: string;
     synsetOffset: number;
     pos: string;
-    gloss: string;
-    lemma: string;
+    sourceTargetHex: string;
+    data?: WordNetSense; // optional — only present for some pointers
+  }
+
+  interface WordNetMeta {
+    synsetOffset: number;
+    lexFilenum: number;
+    synsetType: string;
+    wordCount: number;
+    words: WordNetWord[];
+    pointerCount: number;
+    pointers: WordNetPointer[];
+  }
+
+  interface WordNetSense {
+    glossary: string;
+    meta: WordNetMeta;
   }
 
   interface WordNet {
-    lookup(word: string, callback: (results: WordNetSense[]) => void): void;
+    init(databaseDir?: string): Promise<void>;
+    lookup(word: string, skipPointers?: boolean): Promise<WordNetSense[]>;
   }
 
   const wordnet: WordNet;
-
   export default wordnet;
 }

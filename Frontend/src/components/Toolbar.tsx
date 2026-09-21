@@ -2,14 +2,19 @@ import { useState } from "react";
 
 interface Props {
   onSearch: (word: string, depth: number) => void;
+  loading?: boolean;
 }
 
-export default function Toolbar({ onSearch }: Props) {
+export default function Toolbar({ onSearch, loading = false }: Props) {
   const [word, setWord] = useState("dog");
   const [depth, setDepth] = useState(2);
 
   function submit() {
-    onSearch(word, depth);
+    const trimmed = word.trim();
+    if (!trimmed || loading) {
+      return;
+    }
+    onSearch(trimmed, depth);
   }
 
   return (
@@ -23,9 +28,14 @@ export default function Toolbar({ onSearch }: Props) {
           }
         }}
         placeholder="Search concept..."
+        disabled={loading}
       />
 
-      <select value={depth} onChange={(e) => setDepth(Number(e.target.value))}>
+      <select
+        value={depth}
+        onChange={(e) => setDepth(Number(e.target.value))}
+        disabled={loading}
+      >
         {[1, 2, 3, 4, 5].map((n) => (
           <option key={n} value={n}>
             Depth {n}
@@ -33,7 +43,9 @@ export default function Toolbar({ onSearch }: Props) {
         ))}
       </select>
 
-      <button onClick={submit}>Explore</button>
+      <button onClick={submit} disabled={loading}>
+        {loading ? "Loading…" : "Explore"}
+      </button>
     </div>
   );
 }

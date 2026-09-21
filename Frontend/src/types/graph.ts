@@ -38,6 +38,40 @@ export interface GraphResponse {
   };
 }
 
+export interface PathNode {
+  id: string;
+  label?: string;
+  definition?: string;
+}
+
+export interface PathResponse {
+  start: string;
+  end: string;
+  distance: number | null;
+  path: PathNode[];
+}
+
+export interface SimilarityResponse {
+  from: string;
+  to: string;
+  distance: number | null;
+  similarity: number;
+  path: PathNode[];
+}
+
+export interface SearchResult {
+  id: string;
+  word: string;
+  pos: string;
+  definition: string;
+  relations: unknown[];
+}
+
+export interface SearchResponse {
+  word: string;
+  results: SearchResult[];
+}
+
 /*
  * Graph data type definitions:
  *

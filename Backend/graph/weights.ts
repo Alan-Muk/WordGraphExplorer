@@ -1,7 +1,6 @@
 import { RelationType } from "../models/Relations";
 
 export const RelationWeights: Record<RelationType, number> = {
-  synonym: 1,
   hypernym: 1,
   hyponym: 1,
   meronym: 2,

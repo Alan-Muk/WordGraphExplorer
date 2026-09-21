@@ -14,5 +14,5 @@ export interface Synset {
 
 export interface SynsetRelation {
   type: RelationType;
-  target: string;
+  target: Synset; // was: string
 }

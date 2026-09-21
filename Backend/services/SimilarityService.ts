@@ -1,16 +1,13 @@
-import { SemanticGraphService } from "./SemanticGraphService";
+import { SemanticGraphService, PathNode } from "./SemanticGraphService";
 import { dijkstra } from "../engine/Dijkstra";
+import { findNodeByLabel } from "../util/findNodeByLabel";
 
 export interface SimilarityResult {
   from: string;
-
   to: string;
-
-  distance: number;
-
+  distance: number | null;
   similarity: number;
-
-  path: string[];
+  path: PathNode[];
 }
 
 export class SimilarityService {
@@ -27,43 +24,32 @@ export class SimilarityService {
   ): Promise<SimilarityResult> {
     const graph = await this.graphService.build(from, depth);
 
-    const start = graph
-      .getNodes()
-      .find((node) => node.label.toLowerCase().includes(from.toLowerCase()));
-
-    const end = graph
-      .getNodes()
-      .find((node) => node.label.toLowerCase().includes(to.toLowerCase()));
+    const start = findNodeByLabel(graph, from);
+    const end = findNodeByLabel(graph, to);
 
     if (!start || !end) {
-      return {
-        from,
-
-        to,
-
-        distance: Infinity,
-
-        similarity: 0,
-
-        path: [],
-      };
+      return { from, to, distance: null, similarity: 0, path: [] };
     }
 
     const result = dijkstra(graph, start.id, end.id);
 
-    const similarity =
-      result.distance === Infinity ? 0 : 1 / (1 + result.distance);
+    if (result.distance === Infinity || result.path.length === 0) {
+      return { from, to, distance: null, similarity: 0, path: [] };
+    }
 
     return {
       from,
-
       to,
-
       distance: result.distance,
-
-      similarity,
-
-      path: result.path,
+      similarity: 1 / (1 + result.distance),
+      path: result.path.map((id) => {
+        const node = graph.getNode(id);
+        return {
+          id,
+          label: node?.label,
+          definition: node?.definition,
+        };
+      }),
     };
   }
 }

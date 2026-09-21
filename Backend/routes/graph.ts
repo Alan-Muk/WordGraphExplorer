@@ -1,9 +1,9 @@
 import { Router } from "express";
 import normalise from "../util/normalise";
 import { SemanticGraphService } from "../services/SemanticGraphService";
+import { NotFoundError } from "../util/errors";
 
 const router = Router();
-
 const service = new SemanticGraphService();
 
 router.get("/:word", async (req, res) => {
@@ -11,7 +11,6 @@ router.get("/:word", async (req, res) => {
     const word = normalise(req.params.word);
 
     const depthValue = Number(req.query.depth ?? 5);
-
     const depth =
       Number.isFinite(depthValue) && depthValue > 0
         ? Math.min(depthValue, 5)
@@ -21,17 +20,16 @@ router.get("/:word", async (req, res) => {
 
     res.json({
       word,
-
       ...graph.toJSON(),
-
       stats: graph.getStats(),
     });
-  } catch (err: any) {
-    console.error(err.message);
+  } catch (err: unknown) {
+    if (err instanceof NotFoundError) {
+      return res.status(404).json({ error: err.message });
+    }
 
-    res.status(404).json({
-      error: "Word graph unavailable",
-    });
+    console.error("Graph build failed:", err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

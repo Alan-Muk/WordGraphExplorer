@@ -12,37 +12,44 @@ import type { GraphResponse, GraphNode } from "./types/graph";
 
 export default function App() {
   const [graph, setGraph] = useState<GraphResponse | null>(null);
-
   const [selected, setSelected] = useState<GraphNode | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function search(word: string, depth: number) {
-    const result = await fetchGraph(word, depth);
+    setLoading(true);
+    setError(null);
 
-    setGraph(result);
-
-    // clear old selection
-    setSelected(null);
+    try {
+      const result = await fetchGraph(word, depth);
+      setGraph(result);
+      setSelected(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Search failed");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <div className="app">
-      <Toolbar onSearch={search} />
+      <Toolbar onSearch={search} loading={loading} />
+
+      {error && (
+        <div className="error-banner" role="alert">
+          {error}
+        </div>
+      )}
 
       {graph && (
-        <StatsCard
-          nodes={graph.stats.nodes}
-
-          edges={graph.stats.edges}
-        />
+        <StatsCard nodes={graph.stats.nodes} edges={graph.stats.edges} />
       )}
 
       <div className="canvas">
         {graph && (
           <GraphCanvas
             graph={graph}
-
             selectedId={selected?.id ?? null}
-
             onSelect={(node) => setSelected(node)}
           />
         )}
@@ -50,11 +57,8 @@ export default function App() {
         {selected && graph && (
           <NodePanel
             node={selected}
-
             nodes={graph.nodes}
-
             edges={graph.edges}
-
             onClose={() => setSelected(null)}
           />
         )}
