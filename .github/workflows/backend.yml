@@ -1,27 +1,38 @@
-name: WordGraph Backend CI
+name: Backend CI
 
 on:
   push:
     branches: [main]
     paths:
-      - 'Backend/**'
+      - "Backend/**"
+      - ".github/workflows/backend.yml"
   pull_request:
     paths:
-      - 'Backend/**'
+      - "Backend/**"
+      - ".github/workflows/backend.yml"
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: Backend
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: Backend/package-lock.json
-      - run: npm ci
-      - run: npx tsc --noEmit
-      - run: npm test
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test

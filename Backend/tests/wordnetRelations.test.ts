@@ -11,15 +11,15 @@ describe("WordNet pointer mapping", () => {
   });
 
   test("maps meronym pointers", () => {
-    expect(mapPointer("%p")).toBe("meronym");
-
-    expect(mapPointer("%m")).toBe("meronym");
+    expect(mapPointer("#p")).toBe("meronym");
+    expect(mapPointer("#m")).toBe("meronym");
+    expect(mapPointer("#s")).toBe("meronym");
   });
 
   test("maps holonym pointers", () => {
-    expect(mapPointer("#p")).toBe("holonym");
-
-    expect(mapPointer("#m")).toBe("holonym");
+    expect(mapPointer("%p")).toBe("holonym");
+    expect(mapPointer("%m")).toBe("holonym");
+    expect(mapPointer("%s")).toBe("holonym");
   });
 
   test("maps antonym pointer", () => {

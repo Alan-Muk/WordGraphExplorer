@@ -1,3 +1,6 @@
+export const DEPTH_OPTIONS = [1, 2, 3, 4, 5] as const;
+export const DEFAULT_DEPTH = 2;
+
 export interface GraphNode {
   id: string;
 
@@ -64,12 +67,30 @@ export interface SearchResult {
   word: string;
   pos: string;
   definition: string;
-  relations: unknown[];
 }
 
 export interface SearchResponse {
   word: string;
   results: SearchResult[];
+}
+
+export interface GroupedNode {
+  id: string;
+  label: string;
+  definition?: string;
+  pos?: string;
+}
+
+export interface RelationGroup {
+  relation: string;
+  total: number;
+  nodes: GroupedNode[];
+}
+
+export interface GroupedGraphResponse {
+  word: string;
+  root: GroupedNode;
+  groups: RelationGroup[];
 }
 
 /*

@@ -1,6 +1,7 @@
 import { SemanticGraphService, PathNode } from "./SemanticGraphService";
 import { dijkstra } from "../engine/Dijkstra";
 import { findNodeByLabel } from "../util/findNodeByLabel";
+import { DEFAULT_DEPTH } from "../config";
 
 export interface SimilarityResult {
   from: string;
@@ -20,7 +21,7 @@ export class SimilarityService {
   async compare(
     from: string,
     to: string,
-    depth = 5,
+    depth = DEFAULT_DEPTH,
   ): Promise<SimilarityResult> {
     const graph = await this.graphService.build(from, depth);
 

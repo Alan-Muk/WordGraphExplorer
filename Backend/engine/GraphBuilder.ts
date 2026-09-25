@@ -1,7 +1,6 @@
 import { Graph } from "./Graph";
 import { Synset } from "../models/Synset";
 import { relationWeight } from "../graph/weights";
-import { inverseRelation } from "../graph/inverses";
 
 export class GraphBuilder {
   build(synsets: Synset[]): Graph {
@@ -32,19 +31,8 @@ export class GraphBuilder {
         });
 
         graph.addEdge({
-          source: relation.target.id,
-
-          target: synset.id,
-
-          label: inverseRelation(relation.type),
-
-          weight,
-        });
-
-        // Reverse edge for traversal
-        graph.addEdge({
-          source: relation.target.id,
-          target: synset.id,
+          source: synset.id,
+          target: relation.target.id,
           label: relation.type,
           weight,
         });

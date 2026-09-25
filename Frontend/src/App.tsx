@@ -1,39 +1,87 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Toolbar from "./components/Toolbar";
-import StatsCard from "./components/StatsCard";
 import Legend from "./components/Legend";
-import GraphCanvas from "./components/GraphCanvas";
-import NodePanel from "./components/NodePanel";
+import Breadcrumb from "./components/Breadcrumb";
+import GroupedGraphCanvas from "./components/GroupedGraphCanvas";
 
-import { fetchGraph } from "./api/graph";
+import { fetchGroupedGraph } from "./api/graph";
 
-import type { GraphResponse, GraphNode } from "./types/graph";
+import type { GroupedGraphResponse, GroupedNode } from "./types/graph";
+
+interface Step {
+  kind: "word" | "relation";
+  value: string;
+}
 
 export default function App() {
-  const [graph, setGraph] = useState<GraphResponse | null>(null);
-  const [selected, setSelected] = useState<GraphNode | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [history, setHistory] = useState<Step[]>([
+    { kind: "word", value: "dog" },
+  ]);
+  const [data, setData] = useState<GroupedGraphResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function search(word: string, depth: number) {
-    setLoading(true);
-    setError(null);
+  const currentWord =
+    [...history].reverse().find((s) => s.kind === "word")?.value ?? "";
 
-    try {
-      const result = await fetchGraph(word, depth);
-      setGraph(result);
-      setSelected(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Search failed");
-    } finally {
-      setLoading(false);
-    }
+  const lastStep = history[history.length - 1];
+  const activeRelation =
+    lastStep?.kind === "relation"
+      ? lastStep.value
+      : (data?.groups[0]?.relation ?? null);
+
+  // Derived loading state — true while the loaded data doesn't match the
+  // requested word and no error has been recorded for this attempt.
+  const loading =
+    currentWord !== "" && data?.word !== currentWord && error === null;
+
+  useEffect(() => {
+    if (!currentWord) return;
+
+    let cancelled = false;
+
+    fetchGroupedGraph(currentWord)
+      .then((result) => {
+        if (cancelled) return;
+        setData(result);
+        setError(null);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setError(err instanceof Error ? err.message : "Search failed");
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentWord]);
+
+  function search(word: string) {
+    setHistory([{ kind: "word", value: word }]);
+  }
+
+  function selectRelation(relation: string) {
+    setHistory((h) => {
+      if (h[h.length - 1]?.kind === "relation") {
+        return [...h.slice(0, -1), { kind: "relation", value: relation }];
+      }
+      return [...h, { kind: "relation", value: relation }];
+    });
+  }
+
+  function navigateToNode(node: GroupedNode) {
+    setHistory((h) => [...h, { kind: "word", value: node.label }]);
+  }
+
+  function navigateToStep(index: number) {
+    setHistory((h) => h.slice(0, index + 1));
   }
 
   return (
     <div className="app">
       <Toolbar onSearch={search} loading={loading} />
+
+      <Breadcrumb history={history} onNavigate={navigateToStep} />
 
       {error && (
         <div className="error-banner" role="alert">
@@ -41,30 +89,25 @@ export default function App() {
         </div>
       )}
 
-      {graph && (
-        <StatsCard nodes={graph.stats.nodes} edges={graph.stats.edges} />
-      )}
-
       <div className="canvas">
-        {graph && (
-          <GraphCanvas
-            graph={graph}
-            selectedId={selected?.id ?? null}
-            onSelect={(node) => setSelected(node)}
-          />
-        )}
-
-        {selected && graph && (
-          <NodePanel
-            node={selected}
-            nodes={graph.nodes}
-            edges={graph.edges}
-            onClose={() => setSelected(null)}
+        {data && (
+          <GroupedGraphCanvas
+            data={data}
+            activeRelation={activeRelation}
+            onSelectNode={navigateToNode}
           />
         )}
       </div>
 
-      <Legend />
+      {loading && <div className="canvas-loading">Loading…</div>}
+
+      {data && (
+        <Legend
+          groups={data.groups}
+          active={activeRelation}
+          onSelect={selectRelation}
+        />
+      )}
     </div>
   );
 }

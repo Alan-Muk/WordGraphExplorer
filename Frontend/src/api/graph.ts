@@ -1,5 +1,6 @@
 import type {
   GraphResponse,
+  GroupedGraphResponse,
   PathResponse,
   SimilarityResponse,
   SearchResponse,
@@ -63,4 +64,13 @@ export async function fetchSimilarity(
 export async function searchWord(word: string): Promise<SearchResponse> {
   const params = new URLSearchParams({ word });
   return request<SearchResponse>(`${API}/search?${params}`);
+}
+
+export async function fetchGroupedGraph(
+  word: string,
+): Promise<GroupedGraphResponse> {
+  const params = new URLSearchParams({ view: "grouped" });
+  return request<GroupedGraphResponse>(
+    `${API}/graph/${encodeURIComponent(word)}?${params}`,
+  );
 }
