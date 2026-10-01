@@ -1,9 +1,11 @@
 import type {
   GraphResponse,
   GroupedGraphResponse,
+  GraphTreeResponse,
+  PathAlgorithm,
   PathResponse,
-  SimilarityResponse,
   SearchResponse,
+  SimilarityResponse,
 } from "../types/graph";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:3001";
@@ -45,14 +47,6 @@ export async function fetchGraph(
   );
 }
 
-export async function fetchPath(
-  from: string,
-  to: string,
-): Promise<PathResponse> {
-  const params = new URLSearchParams({ from, to });
-  return request<PathResponse>(`${API}/path?${params}`);
-}
-
 export async function fetchSimilarity(
   from: string,
   to: string,
@@ -73,4 +67,32 @@ export async function fetchGroupedGraph(
   return request<GroupedGraphResponse>(
     `${API}/graph/${encodeURIComponent(word)}?${params}`,
   );
+}
+
+export async function fetchTree(
+  word: string,
+  depth = 4,
+): Promise<GraphTreeResponse> {
+  const params = new URLSearchParams({
+    view: "tree",
+    depth: String(depth),
+  });
+  return request<GraphTreeResponse>(
+    `${API}/graph/${encodeURIComponent(word)}?${params}`,
+  );
+}
+
+export async function fetchPath(
+  from: string,
+  to: string,
+  algorithm: PathAlgorithm = "dijkstra",
+  depth = 5,
+): Promise<PathResponse> {
+  const params = new URLSearchParams({
+    from,
+    to,
+    algorithm,
+    depth: String(depth),
+  });
+  return request<PathResponse>(`${API}/path?${params}`);
 }

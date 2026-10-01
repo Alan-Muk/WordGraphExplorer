@@ -8,17 +8,20 @@ describe("Legend", () => {
     {
       relation: "hypernym",
       total: 2,
+      top: { id: "1", label: "a", rank: 0 },
       nodes: [
-        { id: "1", label: "a" },
-        { id: "2", label: "b" },
+        { id: "1", label: "a", rank: 0 },
+        { id: "2", label: "b", rank: 0 },
       ],
     },
     {
       relation: "hyponym",
       total: 142,
+      top: { id: "h0", label: "h0", rank: 0 },
       nodes: Array.from({ length: 30 }, (_, i) => ({
         id: `h${i}`,
         label: `h${i}`,
+        rank: 0,
       })),
     },
   ];

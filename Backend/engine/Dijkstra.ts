@@ -1,17 +1,9 @@
 import { Graph } from "./Graph";
 import { PriorityQueue } from "./PriorityQueue";
 
-export interface PathResult {
-  path: string[];
-  distance: number;
-}
+import type { PathResult } from "../models/PathResult";
 
-export function dijkstra(
-  graph: Graph,
-  start: string,
-  end: string
-): PathResult {
-
+export function dijkstra(graph: Graph, start: string, end: string): PathResult {
   const distances = new Map<string, number>();
   const previous = new Map<string, string | null>();
 
@@ -36,32 +28,17 @@ export function dijkstra(
     }
 
     for (const edge of graph.getNeighbors(currentNode)) {
+      const newDistance = distances.get(currentNode)! + graph.edgeWeight(edge);
 
-      const newDistance =
-        distances.get(currentNode)! + edge.weight;
+      if (newDistance < distances.get(edge.target)!) {
+        distances.set(edge.target, newDistance);
 
-      if (
-        newDistance <
-        distances.get(edge.target)!
-      ) {
-        distances.set(
-          edge.target,
-          newDistance
-        );
+        previous.set(edge.target, currentNode);
 
-        previous.set(
-          edge.target,
-          currentNode
-        );
-
-        queue.enqueue(
-          edge.target,
-          newDistance
-        );
+        queue.enqueue(edge.target, newDistance);
       }
     }
   }
-
 
   const path: string[] = [];
 
@@ -75,13 +52,13 @@ export function dijkstra(
   if (path[0] !== start) {
     return {
       path: [],
-      distance: Infinity
+      distance: Infinity,
     };
   }
 
   return {
     path,
-    distance: distances.get(end)!
+    distance: distances.get(end)!,
   };
 }
 

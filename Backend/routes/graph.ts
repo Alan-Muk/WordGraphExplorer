@@ -15,6 +15,17 @@ router.get("/:word", async (req, res) => {
       return res.json(grouped);
     }
 
+    if (req.query.view === "tree") {
+      const depthRaw = Number(req.query.depth ?? 4);
+      const depth =
+        Number.isFinite(depthRaw) && depthRaw >= 0
+          ? Math.min(Math.floor(depthRaw), 6)
+          : 4;
+
+      const tree = await service.tree(word, depth);
+      return res.json(tree);
+    }
+
     const depthValue = Number(req.query.depth ?? DEFAULT_DEPTH);
     const depth =
       Number.isFinite(depthValue) && depthValue > 0

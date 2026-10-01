@@ -1,36 +1,23 @@
 import { useEffect, useRef } from "react";
 import cytoscape from "cytoscape";
-import cola from "cytoscape-cola";
 import { RELATION_COLORS } from "../constants/relations";
-import type { GroupedGraphResponse, GroupedNode } from "../types/graph";
-
-cytoscape.use(cola);
-
-type ColaLayoutOptions = cytoscape.LayoutOptions & {
-  animate?: boolean;
-  avoidOverlap?: boolean;
-  edgeLength?: number;
-  nodeSpacing?: number;
-  maxSimulationTime?: number;
-};
+import type { GraphTreeResponse, TreeNode } from "../types/graph";
 
 interface Props {
-  data: GroupedGraphResponse;
-  activeRelation: string | null;
-  onSelectNode: (node: GroupedNode) => void;
-  onNavigateNode: (node: GroupedNode) => void;
+  data: GraphTreeResponse;
+  onSelectNode: (node: TreeNode) => void;
+  onNavigateNode: (node: TreeNode) => void;
 }
 
-export default function GroupedGraphCanvas({
+export default function TreeView({
   data,
-  activeRelation,
   onSelectNode,
-  onNavigateNode, // ← this is likely missing
+  onNavigateNode,
 }: Props) {
   const container = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
   const onSelectRef = useRef(onSelectNode);
-  const onNavigateRef = useRef(onNavigateNode); // ← and this
+  const onNavigateRef = useRef(onNavigateNode);
   const dataRef = useRef(data);
 
   useEffect(() => {
@@ -55,17 +42,17 @@ export default function GroupedGraphCanvas({
           selector: "node",
           style: {
             label: "data(label)",
-            width: 26,
-            height: 26,
+            width: 22,
+            height: 22,
             "font-size": 9,
             color: "#e5e7eb",
             "text-valign": "bottom",
-            "text-margin-y": 6,
+            "text-margin-y": 5,
             "background-color": "#64748b",
             "border-width": 1,
             "border-color": "#cbd5e1",
             "text-wrap": "wrap",
-            "text-max-width": "100px",
+            "text-max-width": "90px",
           },
         },
         {
@@ -73,7 +60,7 @@ export default function GroupedGraphCanvas({
           style: {
             width: 40,
             height: 40,
-            "font-size": 12,
+            "font-size": 13,
             "font-weight": 600,
             "background-color": "#facc15",
             "border-color": "#fde68a",
@@ -81,14 +68,31 @@ export default function GroupedGraphCanvas({
             color: "#facc15",
           },
         },
+        // Layer-specific sizing: deeper nodes are smaller.
+        {
+          selector: "node.layer-1",
+          style: { width: 28, height: 28, "font-size": 10 },
+        },
+        {
+          selector: "node.layer-2",
+          style: { width: 24, height: 24, "font-size": 9 },
+        },
+        {
+          selector: "node.layer-3",
+          style: { width: 20, height: 20, "font-size": 8 },
+        },
+        {
+          selector: "node.layer-4",
+          style: { width: 16, height: 16, "font-size": 7 },
+        },
         {
           selector: "edge",
           style: {
             width: 1.5,
             "curve-style": "bezier",
             "target-arrow-shape": "triangle",
-            "arrow-scale": 0.6,
-            "line-opacity": 0.8,
+            "arrow-scale": 0.5,
+            "line-opacity": 0.7,
           },
         },
         ...Object.entries(RELATION_COLORS).map(([label, color]) => ({
@@ -98,27 +102,19 @@ export default function GroupedGraphCanvas({
             "target-arrow-color": color,
           },
         })),
-        {
-          selector: ".dimmed",
-          style: {
-            opacity: 0.35,
-          },
-        },
       ],
       layout: { name: "preset" },
       wheelSensitivity: 0.75,
-      minZoom: 0.2,
-      maxZoom: 3,
-      autoungrabify: true, // ← add this
+      minZoom: 0.15,
+      maxZoom: 4,
+      autoungrabify: true,
     });
 
     cyRef.current = cy;
 
     cy.on("tap", "node", (event) => {
       const nodeId = event.target.id();
-      if (nodeId === dataRef.current.root.id) return;
-
-      const node = findNodeInGroups(dataRef.current, nodeId);
+      const node = dataRef.current.nodes.find((n) => n.id === nodeId);
       if (node) {
         onSelectRef.current(node);
       }
@@ -132,7 +128,7 @@ export default function GroupedGraphCanvas({
 
       tapTimeout = window.setTimeout(() => {
         tapTimeout = null;
-        const node = findNodeInGroups(dataRef.current, nodeId);
+        const node = dataRef.current.nodes.find((n) => n.id === nodeId);
         if (node) onSelectRef.current(node);
       }, 250);
     });
@@ -143,12 +139,11 @@ export default function GroupedGraphCanvas({
         tapTimeout = null;
       }
       const nodeId = event.target.id();
-      const node = findNodeInGroups(dataRef.current, nodeId);
+      const node = dataRef.current.nodes.find((n) => n.id === nodeId);
       if (node) onNavigateRef.current(node);
     });
 
     return () => {
-      if (tapTimeout !== null) window.clearTimeout(tapTimeout);
       cy.destroy();
       cyRef.current = null;
     };
@@ -161,72 +156,39 @@ export default function GroupedGraphCanvas({
     cy.elements().remove();
 
     cy.batch(() => {
-      cy.add({
-        group: "nodes",
-        data: { id: data.root.id, label: data.root.label },
-        classes: "root",
-      });
+      for (const node of data.nodes) {
+        const classes =
+          node.id === data.root.id ? "root" : `layer-${node.layer}`;
+        cy.add({
+          group: "nodes",
+          data: { id: node.id, label: node.label },
+          classes,
+        });
+      }
 
-      if (activeRelation) {
-        // Focused: show the full (capped) group for the active relation.
-        const group = data.groups.find((g) => g.relation === activeRelation);
-        if (!group) return;
-
-        for (const node of group.nodes) {
-          addChild(cy, data.root.id, node, group.relation);
-        }
-      } else {
-        // Landing: show one top node per relation.
-        for (const group of data.groups) {
-          addChild(cy, data.root.id, group.top, group.relation);
-        }
+      for (const edge of data.edges) {
+        cy.add({
+          group: "edges",
+          data: {
+            id: `${edge.source}__${edge.target}__${edge.relation}`,
+            source: edge.source,
+            target: edge.target,
+            label: edge.relation,
+          },
+        });
       }
     });
 
     cy.layout({
-      name: "cola",
-      animate: true,
+      name: "breadthfirst",
+      directed: true,
+      circle: true,
+      spacingFactor: 1.6,
       fit: true,
       padding: 80,
-      avoidOverlap: true,
-      edgeLength: 160,
-      nodeSpacing: 40,
-      maxSimulationTime: 1500,
-    } as ColaLayoutOptions).run();
-  }, [data, activeRelation]);
+      animate: false,
+    } as unknown as cytoscape.LayoutOptions).run();
+  }, [data]);
 
   return <div ref={container} className="grouped-canvas" />;
-}
-
-function findNodeInGroups(
-  data: GroupedGraphResponse,
-  nodeId: string,
-): GroupedNode | undefined {
-  if (data.root.id === nodeId) return data.root;
-  for (const group of data.groups) {
-    const found = group.nodes.find((n) => n.id === nodeId);
-    if (found) return found;
-  }
-  return undefined;
-}
-
-function addChild(
-  cy: cytoscape.Core,
-  parentId: string,
-  node: GroupedNode,
-  relation: string,
-) {
-  cy.add({
-    group: "nodes",
-    data: { id: node.id, label: node.label },
-  });
-  cy.add({
-    group: "edges",
-    data: {
-      id: `${parentId}__${node.id}__${relation}`,
-      source: parentId,
-      target: node.id,
-      label: relation,
-    },
-  });
 }

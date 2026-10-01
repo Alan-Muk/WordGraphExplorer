@@ -1,5 +1,6 @@
 import { GraphNode } from "../models/GraphNode";
 import { GraphEdge } from "../models/GraphEdge";
+import { edgeWeight as edgeWeightFn } from "../graph/weights";
 
 export class Graph {
   private nodes = new Map<string, GraphNode>();
@@ -36,6 +37,21 @@ export class Graph {
 
   getNeighbors(id: string): GraphEdge[] {
     return this.adjacency.get(id) ?? [];
+  }
+
+  /**
+   * Number of outgoing edges from a node.
+   */
+  degree(id: string): number {
+    return this.adjacency.get(id)?.length ?? 0;
+  }
+
+  /**
+   * Effective traversal weight for an edge, combining the relation's
+   * semantic weight with the target's degree.
+   */
+  edgeWeight(edge: GraphEdge): number {
+    return edgeWeightFn(edge.label, this.degree(edge.target));
   }
 
   getNodes() {

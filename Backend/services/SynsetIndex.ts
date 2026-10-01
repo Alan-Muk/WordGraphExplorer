@@ -3,9 +3,9 @@ import path from "path";
 import readline from "readline";
 import { createReadStream } from "fs";
 
-/**
- * Single-char pos → full synset type. Mirrors wordnet's internal map.
- */
+import { mapPointer } from "./wordnetRelations";
+import type { RelationType } from "../models/Relations";
+
 const SYNSET_TYPE_MAP: Record<string, string> = {
   n: "noun",
   v: "verb",
@@ -26,6 +26,11 @@ interface ParsedPointer {
   sourceTargetHex: string;
 }
 
+export interface ParsedRelation {
+  type: RelationType;
+  target: ParsedSynset;
+}
+
 export interface ParsedSynset {
   glossary: string;
   meta: {
@@ -41,15 +46,10 @@ export interface ParsedSynset {
 
 export class SynsetIndex {
   private index = new Map<string, ParsedSynset>();
+  private rankMap = new Map<string, number>();
   private loaded = false;
   private loading: Promise<void> | null = null;
 
-  /**
-   * Reads all four WordNet data files into memory, keyed on
-   * `${synsetOffset}.${posChar}` (e.g. "2084071.n").
-   *
-   * Safe to call concurrently — repeated calls share the same promise.
-   */
   async load(dbDir: string): Promise<void> {
     if (this.loaded) return;
     if (this.loading) return this.loading;
@@ -57,22 +57,13 @@ export class SynsetIndex {
     this.loading = (async () => {
       const exts = ["noun", "verb", "adj", "adv"];
 
+      // Load data files and index files in parallel per extension.
       await Promise.all(
         exts.map(async (ext) => {
-          const filePath = path.join(dbDir, `data.${ext}`);
-
-          const rl = readline.createInterface({
-            input: createReadStream(filePath, { encoding: "utf8" }),
-            crlfDelay: Infinity,
-          });
-
-          for await (const line of rl) {
-            if (!line || line.startsWith(" ")) continue;
-
-            const parsed = parseDataLine(line);
-            const key = `${parsed.meta.synsetOffset}.${posFromFullType(parsed.meta.synsetType)}`;
-            this.index.set(key, parsed);
-          }
+          await Promise.all([
+            this.loadDataFile(path.join(dbDir, `data.${ext}`)),
+            this.loadIndexFile(path.join(dbDir, `index.${ext}`)),
+          ]);
         }),
       );
 
@@ -83,27 +74,113 @@ export class SynsetIndex {
     return this.loading;
   }
 
-  /**
-   * Resolves a synset by its offset and single-char pos.
-   *
-   * `posChar` is the one-letter form used in pointer records ("n", "v",
-   * "a", "s", "r"). Internally the index key uses the same char.
-   */
   get(offset: number, posChar: string): ParsedSynset | undefined {
     return this.index.get(`${offset}.${posChar}`);
+  }
+
+  /**
+   * Returns the tagsense count for a lemma in a given POS.
+   *
+   * Higher values indicate a more common sense in the tagged corpora.
+   * Returns 0 if the lemma is unknown or untagged.
+   *
+   * `posChar` is the one-letter form used in WordNet index files:
+   * "n" (noun), "v" (verb), "a" (adjective), "r" (adverb).
+   */
+  rank(lemma: string, posChar: string): number {
+    return this.rankMap.get(`${lemma.toLowerCase()}.${posChar}`) ?? 0;
   }
 
   get size(): number {
     return this.index.size;
   }
+
+  get rankSize(): number {
+    return this.rankMap.size;
+  }
+
+  private async loadDataFile(filePath: string): Promise<void> {
+    const rl = readline.createInterface({
+      input: createReadStream(filePath, { encoding: "utf8" }),
+      crlfDelay: Infinity,
+    });
+
+    for await (const line of rl) {
+      if (!line || line.startsWith(" ")) continue;
+
+      const parsed = parseDataLine(line);
+      const key = `${parsed.meta.synsetOffset}.${posFromFullType(
+        parsed.meta.synsetType,
+      )}`;
+      this.index.set(key, parsed);
+    }
+  }
+
+  private async loadIndexFile(filePath: string): Promise<void> {
+    const rl = readline.createInterface({
+      input: createReadStream(filePath, { encoding: "utf8" }),
+      crlfDelay: Infinity,
+    });
+
+    for await (const line of rl) {
+      if (!line || line.startsWith(" ")) continue;
+
+      const parsed = parseIndexLine(line);
+      if (!parsed) continue;
+
+      const key = `${parsed.lemma}.${parsed.pos}`;
+      this.rankMap.set(key, parsed.tagsenseCount);
+    }
+  }
+
+  /**
+   * Returns the outgoing relations of a synset by ID, with each target
+   * resolved to a full ParsedSynset.
+   *
+   * The synset ID format is `<offset>.<fullType>` (e.g. "2084071.noun").
+   * Returns an empty array if the synset or any target can't be resolved.
+   */
+  relations(synsetId: string): ParsedRelation[] {
+    const parsed = this.parseSynsetId(synsetId);
+    if (!parsed) return [];
+
+    const synset = this.get(parsed.offset, parsed.posChar);
+    if (!synset) return [];
+
+    const result: ParsedRelation[] = [];
+
+    for (const pointer of synset.meta.pointers) {
+      const relationType = mapPointer(pointer.pointerSymbol);
+      if (!relationType) continue;
+
+      const target = this.get(pointer.synsetOffset, pointer.pos);
+      if (!target) continue;
+
+      result.push({
+        type: relationType,
+        target,
+      });
+    }
+
+    return result;
+  }
+
+  private parseSynsetId(
+    synsetId: string,
+  ): { offset: number; posChar: string } | null {
+    const dotIndex = synsetId.indexOf(".");
+    if (dotIndex === -1) return null;
+
+    const offsetStr = synsetId.slice(0, dotIndex);
+    const fullType = synsetId.slice(dotIndex + 1);
+
+    const offset = parseInt(offsetStr, 10);
+    if (!Number.isFinite(offset)) return null;
+
+    return { offset, posChar: posCharOf(fullType) };
+  }
 }
 
-/**
- * Convert a full synset type (e.g. "noun") back to the one-char form used
- * in WordNet pointer records (e.g. "n"). Needed so the key we store under
- * matches the key we look up with, because pointers reference targets by
- * single-char pos.
- */
 function posFromFullType(fullType: string): string {
   switch (fullType) {
     case "noun":
@@ -122,14 +199,13 @@ function posFromFullType(fullType: string): string {
 }
 
 /**
- * Parses a single WordNet data line.
+ * Parses one line of a WordNet data file.
  *
  * Format:
  *   synset_offset lex_filenum ss_type w_cnt word lex_id [word lex_id...]
  *   p_cnt [ptr_symbol synset_offset pos sourceTargetHex]... | gloss
  *
- * Note: w_cnt and lex_id are hex; synset_offset (both top-level and pointer)
- * are decimal.
+ * Note: w_cnt and lex_id are hex; synset_offset is decimal.
  */
 function parseDataLine(line: string): ParsedSynset {
   const [metaPart, ...glossParts] = line.split("|");
@@ -158,8 +234,6 @@ function parseDataLine(line: string): ParsedSynset {
     });
   }
 
-  // Any remaining tokens before the glossary are verb frames — not used here.
-
   return {
     glossary,
     meta: {
@@ -172,4 +246,52 @@ function parseDataLine(line: string): ParsedSynset {
       pointers,
     },
   };
+}
+
+interface ParsedIndex {
+  lemma: string;
+  pos: string;
+  tagsenseCount: number;
+}
+
+/**
+ * Parses one line of a WordNet index file.
+ *
+ * Format:
+ *   lemma pos synset_cnt p_cnt [ptr_symbol...] sense_cnt tagsense_cnt synset_offset [...]
+ *
+ * Only `lemma`, `pos`, and `tagsense_cnt` are extracted.
+ */
+function parseIndexLine(line: string): ParsedIndex | null {
+  const parts = line.trim().split(/\s+/);
+  if (parts.length < 8) return null;
+
+  const lemma = parts[0];
+  const pos = parts[1];
+  const pointerCount = parseInt(parts[3], 10);
+
+  // Skip past the pointer symbols (starting at index 4).
+  const afterPointers = 4 + pointerCount;
+
+  // Fields after pointers: sense_cnt, tagsense_cnt, synset_offset...
+  const tagsenseCount = parseInt(parts[afterPointers + 1] ?? "0", 10);
+
+  return { lemma, pos, tagsenseCount };
+}
+
+function posCharOf(fullType: string): string {
+  switch (fullType) {
+    case "noun":
+      return "n";
+    case "verb":
+      return "v";
+    case "adjective":
+      return "a";
+    case "adjective satellite":
+      return "s";
+    case "adverb":
+      return "r";
+    default:
+      return fullType;
+  }
 }

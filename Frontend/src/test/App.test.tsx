@@ -9,14 +9,15 @@ import * as api from "../api/graph";
 vi.mock("../components/GroupedGraphCanvas", () => ({
   default: ({
     data,
-    onSelectNode,
+    onNavigateNode,
   }: {
     data: { word: string };
-    onSelectNode: (node: { id: string; label: string }) => void;
+
+    onNavigateNode: (node: { id: string; label: string }) => void;
   }) => (
     <div data-testid="canvas">
       <span data-testid="canvas-word">{data.word}</span>
-      <button onClick={() => onSelectNode({ id: "x", label: "poodle" })}>
+      <button onClick={() => onNavigateNode({ id: "x", label: "poodle" })}>
         click-poodle
       </button>
     </div>
@@ -39,17 +40,19 @@ describe("App", () => {
     vi.mocked(api.fetchGroupedGraph).mockImplementation(
       async (word: string) => ({
         word,
-        root: { id: "1", label: word },
+        root: { id: "1", label: word, rank: 0 },
         groups: [
           {
             relation: "hypernym",
             total: 1,
-            nodes: [{ id: "2", label: "canine" }],
+            top: { id: "2", label: "canine", rank: 0 },
+            nodes: [{ id: "2", label: "canine", rank: 0 }],
           },
           {
             relation: "hyponym",
             total: 18,
-            nodes: [{ id: "3", label: "poodle" }],
+            top: { id: "3", label: "poodle", rank: 0 },
+            nodes: [{ id: "3", label: "poodle", rank: 0 }],
           },
         ],
       }),
@@ -67,19 +70,18 @@ describe("App", () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await waitFor(() => screen.getByText("hyponym"));
+    const row = await screen.findByRole("button", { name: /hyponym/i });
+    await user.click(row);
 
-    await user.click(screen.getByText("hyponym"));
+    await waitFor(() => {
+      const el = document.querySelector(".breadcrumb");
+      if (!el) throw new Error("breadcrumb not found");
+      return el;
+    });
 
-    // The breadcrumb should now show 'dog › hyponym'.
-    // Use a query scoped to the breadcrumb container to avoid matching
-    // the word "dog" that appears elsewhere (canvas, etc.).
-    const breadcrumb = document.querySelector(".breadcrumb");
-    expect(breadcrumb).not.toBeNull();
-    if (breadcrumb) {
-      expect(breadcrumb.textContent).toContain("dog");
-      expect(breadcrumb.textContent).toContain("hyponym");
-    }
+    const breadcrumb = document.querySelector(".breadcrumb")!;
+    expect(breadcrumb.textContent).toContain("dog");
+    expect(breadcrumb.textContent).toContain("hyponym");
   });
 
   it("loads a new word when a node is clicked", async () => {

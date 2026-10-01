@@ -1,11 +1,11 @@
 import wordnet from "wordnet";
 import { mapPointer } from "./wordnetRelations";
-import { Synset, SynsetSummary } from "../models/Synset";
 import { CacheService } from "./CacheService";
 import { DEFAULT_DEPTH } from "../config";
 import { SynsetIndex } from "./SynsetIndex";
 import path from "path";
 import { createRequire } from "module";
+import { Synset, SynsetSummary, SynsetRelation } from "../models/Synset";
 
 const synsetIndex = new SynsetIndex();
 const wordnetPkgDir = path.dirname(require.resolve("wordnet/package.json"));
@@ -132,5 +132,36 @@ export class WordNetService {
 
       return results;
     });
+  }
+
+  async relations(synsetId: string): Promise<SynsetRelation[]> {
+    await ensureInitialized();
+
+    const parsed = synsetIndex.relations(synsetId);
+
+    return parsed.map(({ type, target }) => ({
+      type,
+      target: {
+        id: `${target.meta.synsetOffset}.${target.meta.synsetType}`,
+        word: target.meta.words[0]?.word ?? "",
+        pos: target.meta.synsetType,
+        definition: target.glossary,
+        relations: [],
+      },
+    }));
+  }
+
+  /**
+   * Returns the tagsense count for a lemma in a given POS.
+   *
+   * Higher values indicate a more common sense in the WordNet tagged
+   * corpora. Returns 0 if the lemma is untagged or unknown.
+   *
+   * `posChar` is the one-char form used in WordNet index files:
+   * "n" (noun), "v" (verb), "a" (adjective), "s" (adjective satellite),
+   * "r" (adverb).
+   */
+  rank(lemma: string, posChar: string): number {
+    return synsetIndex.rank(lemma, posChar);
   }
 }

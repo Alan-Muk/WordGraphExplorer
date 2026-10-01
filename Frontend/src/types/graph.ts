@@ -47,11 +47,18 @@ export interface PathNode {
   definition?: string;
 }
 
+export interface PathEdge {
+  source: string;
+  target: string;
+  relation: string;
+}
+
 export interface PathResponse {
   start: string;
   end: string;
   distance: number | null;
   path: PathNode[];
+  edges: PathEdge[];
 }
 
 export interface SimilarityResponse {
@@ -78,12 +85,13 @@ export interface GroupedNode {
   id: string;
   label: string;
   definition?: string;
-  pos?: string;
+  rank: number;
 }
 
 export interface RelationGroup {
   relation: string;
   total: number;
+  top: GroupedNode;
   nodes: GroupedNode[];
 }
 
@@ -92,6 +100,35 @@ export interface GroupedGraphResponse {
   root: GroupedNode;
   groups: RelationGroup[];
 }
+
+export interface TreeNode {
+  id: string;
+  label: string;
+  definition?: string;
+  rank: number;
+  layer: number;
+}
+
+export interface TreeEdge {
+  source: string;
+  target: string;
+  relation: string;
+}
+
+export interface GraphTreeResponse {
+  word: string;
+  root: TreeNode;
+  nodes: TreeNode[];
+  edges: TreeEdge[];
+}
+
+export interface SelectableNode {
+  id: string;
+  label?: string;
+  definition?: string;
+}
+
+export type PathAlgorithm = "dijkstra" | "bfs";
 
 /*
  * Graph data type definitions:

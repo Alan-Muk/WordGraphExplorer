@@ -5,13 +5,25 @@ interface Props {
   groups: RelationGroup[];
   active: string | null;
   onSelect: (relation: string) => void;
+  onShowTree?: () => void;
 }
 
-export default function Legend({ groups, active, onSelect }: Props) {
+export default function Legend({
+  groups,
+  active,
+  onSelect,
+  onShowTree,
+}: Props) {
   if (groups.length === 0) return null;
 
   return (
     <div className="legend interactive">
+      {onShowTree && (
+        <button className="legend-back" onClick={onShowTree}>
+          ⤢ Full tree
+        </button>
+      )}
+
       {groups.map((group) => {
         const color = RELATION_COLORS[group.relation] ?? "#94a3b8";
         const isActive = group.relation === active;
