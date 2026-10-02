@@ -99,6 +99,16 @@ export class SynsetIndex {
     return this.rankMap.size;
   }
 
+  getRankStats(): { zero: number; nonZero: number; total: number } {
+    let zero = 0;
+    let nonZero = 0;
+    for (const v of this.rankMap.values()) {
+      if (v === 0) zero++;
+      else nonZero++;
+    }
+    return { zero, nonZero, total: zero + nonZero };
+  }
+
   private async loadDataFile(filePath: string): Promise<void> {
     const rl = readline.createInterface({
       input: createReadStream(filePath, { encoding: "utf8" }),
